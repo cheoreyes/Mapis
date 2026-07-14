@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base target="_top">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        body { font-family: 'Inter', system-ui, sans-serif; background-color: #f8fafc; touch-action: manipulation; }
+        .fade-in { animation: fadeIn 0.3s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* Ocultar flechas de input number */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden bg-slate-50">
+
+    <!-- HEADER -->
+    <header class="bg-slate-900 text-white p-4 shadow-lg z-20 flex-shrink-0">
+        <div class="flex justify-between items-center max-w-md mx-auto w-full">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-sm">M</div>
+                <h1 class="font-bold text-lg tracking-tight">MAPIS DOCENTE</h1>
+            </div>
+            <span id="header-badge" class="text-[10px] font-bold bg-slate-700 text-slate-300 px-2 py-1 rounded-full border border-slate-600">v2.0 AUTH</span>
+        </div>
+    </header>
+
+    <!-- ÁREA PRINCIPAL -->
+    <main class="flex-1 overflow-y-auto relative w-full max-w-md mx-auto bg-white shadow-xl min-h-0">
+        
+        <!-- VISTA 1: LOGIN DOCENTE (PIN) -->
+        <div id="view-login" class="flex flex-col items-center justify-center h-full p-6 space-y-6 fade-in">
+            <div class="text-center space-y-2 mb-4">
+                <div class="w-20 h-20 bg-blue-100 text-blue-600 rounded-full mx-auto flex items-center justify-center text-4xl mb-4">
+                    <i class="ph-fill ph-lock-key"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800">Acceso Docente</h2>
+                <p class="text-sm text-slate-500">Ingresa tu PIN de 4 dígitos para continuar</p>
+            </div>
+
+            <div class="w-full max-w-xs space-y-4">
+                <input type="number" id="pin-input" maxlength="4" inputmode="numeric" pattern="[0-9]*"
+                    class="block w-full text-center text-3xl tracking-[0.5em] py-4 border border-slate-300 rounded-2xl bg-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition shadow-sm" 
+                    placeholder="••••">
+                
+                <button onclick="loginDocente()" 
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-500/30 transition transform active:scale-95 flex items-center justify-center gap-2">
+                    Ingresar <i class="ph-bold ph-arrow-right"></i>
+                </button>
+            </div>
+            
+            <p class="text-xs text-slate-400 mt-8">Sistema de Ciudadanía Escolar MAPIS</p>
+        </div>
+
+        <!-- VISTA 2: DASHBOARD OPERATIVO (Oculta hasta login) -->
+        <div id="view-dashboard" class="hidden flex-col h-full p-6 pb-24 overflow-y-auto fade-in">
+            
+            <!-- Info Docente Logueado -->
+            <div class="flex justify-between items-center mb-6 bg-blue-50 p-3 rounded-xl border border-blue-100">
+                <div class="flex items-center gap-2">
+                    <i class="ph-fill ph-chalkboard-teacher text-blue-600 text-xl"></i>
+                    <span id="docente-nombre" class="font-bold text-blue-900 text-sm">Profesor...</span>
+                </div>
+                <button onclick="logoutDocente()" class="text-xs text-red-600 font-bold hover:bg-red-50 px-2 py-1 rounded-lg transition">Salir</button>
+            </div>
+
+            <!-- Input ID Estudiante -->
+            <div class="space-y-3 mb-6">
+                <label class="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Identificar Alumno</label>
+                <div class="flex gap-2">
+                    <div class="relative flex-1">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="ph ph-student text-slate-400 text-lg"></i>
+                        </div>
+                        <input type="text" id="student-id-input" 
+                            class="block w-full pl-10 pr-3 py-3 border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-bold uppercase transition" 
+                            placeholder="ID o HASH" value="EST001">
+                    </div>
+                    <button onclick="buscarAlumno()" class="bg-slate-800 hover:bg-slate-900 text-white px-4 rounded-xl transition active:scale-95">
+                        <i class="ph-bold ph-magnifying-glass text-xl"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tarjeta Alumno Detectado (Dinámica) -->
+            <div id="student-card" class="hidden bg-white p-5 rounded-3xl shadow-sm border border-slate-200 text-center relative overflow-hidden mb-6 transition-all">
+                <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-emerald-400 to-teal-500"></div>
+                
+                <div class="relative w-20 h-20 mx-auto mb-3">
+                    <img id="stu-photo" src="" class="w-full h-full rounded-full object-cover border-4 border-white shadow-md bg-gray-100">
+                    <div class="absolute bottom-0 right-0 bg-green-500 w-5 h-5 rounded-full border-2 border-white flex items-center justify-center">
+                        <i class="ph-bold ph-check text-white text-[10px]"></i>
+                    </div>
+                </div>
+                
+                <h2 id="stu-name" class="text-lg font-bold text-slate-800 leading-tight">--</h2>
+                <p id="stu-grade" class="text-slate-500 text-xs mt-1 font-medium">--</p>
+                
+                <div class="mt-3 inline-flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
+                    <span class="text-[10px] text-slate-400 font-bold uppercase">Saldo:</span>
+                    <span id="stu-balance" class="text-base font-black text-emerald-600">--</span>
+                </div>
+            </div>
+
+            <!-- Grid de Conductas (Deshabilitado hasta seleccionar alumno) -->
+            <div id="actions-grid" class="opacity-50 pointer-events-none transition-opacity duration-300 space-y-4">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Registrar Conducta</h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="sendTransaction(50, 'Entrega Anticipada', 'Académico')" class="group bg-emerald-50 hover:bg-emerald-100 active:bg-emerald-200 border border-emerald-200 text-emerald-700 p-3 rounded-2xl font-bold transition-all flex flex-col items-center gap-1 shadow-sm active:scale-95">
+                        <i class="ph-fill ph-check-circle text-2xl"></i> <span>+50 pts</span> <span class="text-[9px] font-normal opacity-70">Entrega Ant.</span>
+                    </button>
+                    <button onclick="sendTransaction(30, 'Participación Activa', 'Académico')" class="group bg-teal-50 hover:bg-teal-100 active:bg-teal-200 border border-teal-200 text-teal-700 p-3 rounded-2xl font-bold transition-all flex flex-col items-center gap-1 shadow-sm active:scale-95">
+                        <i class="ph-fill ph-hand-raised text-2xl"></i> <span>+30 pts</span> <span class="text-[9px] font-normal opacity-70">Participación</span>
+                    </button>
+                    <button onclick="sendTransaction(-20, 'Interrupción Clase', 'Hábitos')" class="group bg-red-50 hover:bg-red-100 active:bg-red-200 border border-red-200 text-red-700 p-3 rounded-2xl font-bold transition-all flex flex-col items-center gap-1 shadow-sm active:scale-95">
+                        <i class="ph-fill ph-warning-circle text-2xl"></i> <span>-20 pts</span> <span class="text-[9px] font-normal opacity-70">Interrupción</span>
+                    </button>
+                    <button onclick="sendTransaction(-30, 'Celular sin Permiso', 'Hábitos')" class="group bg-rose-50 hover:bg-rose-100 active:bg-rose-200 border border-rose-200 text-rose-700 p-3 rounded-2xl font-bold transition-all flex flex-col items-center gap-1 shadow-sm active:scale-95">
+                        <i class="ph-fill ph-device-mobile-slash text-2xl"></i> <span>-30 pts</span> <span class="text-[9px] font-normal opacity-70">Celular</span>
+                    </button>
+                </div>
+                
+                <div class="mt-4">
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1 block">Observación (Opcional)</label>
+                    <textarea id="optional-note" rows="2" placeholder="Detalle adicional..." class="w-full p-3 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-blue-500 outline-none transition text-sm resize-none"></textarea>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- OVERLAY DE ESTADO -->
+        <div id="overlay-status" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center backdrop-blur-sm transition-opacity duration-300">
+            <div class="bg-white p-8 rounded-3xl shadow-2xl text-center max-w-[280px] mx-4 transform scale-100 transition-transform duration-300 border border-slate-100">
+                <div id="status-icon" class="text-5xl mb-4 animate-bounce"></div>
+                <h3 id="status-title" class="font-bold text-xl text-slate-800 mb-2">Procesando...</h3>
+                <p id="status-msg" class="text-sm text-slate-500 leading-relaxed">Conectando con servidor</p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- LÓGICA JAVASCRIPT -->
+    <script>
+        // Variables de sesión
+        let sessionDocente = { id: null, nombre: null };
+        let currentStudentHash = null;
+        let isProcessing = false;
+
+        // --- 1. LOGIN DOCENTE ---
+        function loginDocente() {
+            const pin = document.getElementById('pin-input').value.trim();
+            if (!pin) return alert("Ingresa tu PIN");
+
+            showStatus('loading', 'Verificando credenciales...');
+
+            google.script.run
+                .withSuccessHandler(function(res) {
+                    if (res.success) {
+                        sessionDocente = { id: res.idDocente, nombre: res.nombreDocente };
+                        
+                        // Actualizar UI
+                        document.getElementById('docente-nombre').innerText = res.nombreDocente;
+                        document.getElementById('view-login').classList.add('hidden');
+                        document.getElementById('view-dashboard').classList.remove('hidden');
+                        document.getElementById('view-dashboard').classList.add('flex');
+                        
+                        // Limpiar overlay
+                        document.getElementById('overlay-status').classList.add('hidden');
+                        
+                        // Foco al input de alumno
+                        setTimeout(() => document.getElementById('student-id-input').focus(), 100);
+                    } else {
+                        showStatus('error', res.error);
+                        setTimeout(() => {
+                            document.getElementById('overlay-status').classList.add('hidden');
+                            document.getElementById('pin-input').value = '';
+                            document.getElementById('pin-input').focus();
+                        }, 2000);
+                    }
+                })
+                .validarPinDocente(pin);
+        }
+
+        function logoutDocente() {
+            sessionDocente = { id: null, nombre: null };
+            currentStudentHash = null;
+            document.getElementById('view-dashboard').classList.add('hidden');
+            document.getElementById('view-dashboard').classList.remove('flex');
+            document.getElementById('view-login').classList.remove('hidden');
+            document.getElementById('pin-input').value = '';
+            resetStudentCard();
+        }
+
+        // --- 2. BUSCAR ALUMNO (DATOS REALES) ---
+        function buscarAlumno() {
+            const id = document.getElementById('student-id-input').value.trim();
+            if (!id) return alert("Ingresa un ID");
+
+            showStatus('loading', 'Buscando alumno...');
+            currentStudentHash = id;
+
+            google.script.run
+                .withSuccessHandler(function(res) {
+                    document.getElementById('overlay-status').classList.add('hidden');
+                    if (res.success) {
+                        renderStudentCard(res);
+                        enableActions(true);
+                    } else {
+                        alert(res.error);
+                        resetStudentCard();
+                        enableActions(false);
+                    }
+                })
+                .withFailureHandler(function(err) {
+                    document.getElementById('overlay-status').classList.add('hidden');
+                    alert("Error de conexión");
+                })
+                .buscarEstudianteReal(id);
+        }
+
+        function renderStudentCard(data) {
+            document.getElementById('student-card').classList.remove('hidden');
+            document.getElementById('stu-name').innerText = data.nombre;
+            document.getElementById('stu-grade').innerText = data.grado;
+            document.getElementById('stu-balance').innerText = data.saldo;
+            
+            // Foto con cache buster
+            document.getElementById('stu-photo').src = data.foto + '?t=' + new Date().getTime();
+        }
+
+        function resetStudentCard() {
+            document.getElementById('student-card').classList.add('hidden');
+            document.getElementById('student-id-input').value = '';
+            document.getElementById('student-id-input').focus();
+            enableActions(false);
+        }
+
+        function enableActions(enable) {
+            const grid = document.getElementById('actions-grid');
+            if (enable) {
+                grid.classList.remove('opacity-50', 'pointer-events-none');
+            } else {
+                grid.classList.add('opacity-50', 'pointer-events-none');
+            }
+        }
+
+        // --- 3. REGISTRAR TRANSACCIÓN ---
+        function sendTransaction(puntos, tipo, categoria) {
+            if (isProcessing || !currentStudentHash || !sessionDocente.id) return;
+            
+            const nota = document.getElementById('optional-note').value;
+            const data = { 
+                hashQR: currentStudentHash, 
+                puntos: puntos, 
+                tipoConducta: tipo, 
+                categoria: categoria, 
+                nota: nota, 
+                idDocente: sessionDocente.id // Enviamos el ID real del docente
+            };
+
+            showStatus('loading', 'Guardando puntos...');
+            isProcessing = true;
+
+            google.script.run
+                .withSuccessHandler(function(response) {
+                    isProcessing = false;
+                    document.getElementById('overlay-status').classList.add('hidden');
+                    
+                    if (response && response.success) {
+                        // Actualizar saldo localmente
+                        document.getElementById('stu-balance').innerText = response.nuevoSaldo;
+                        document.getElementById('optional-note').value = '';
+                        
+                        // Feedback visual rápido
+                        alert(`✅ Registrado: ${puntos > 0 ? '+' : ''}${puntos} pts`);
+                        
+                        // Opcional: Resetear para siguiente alumno
+                        // resetStudentCard(); 
+                    } else {
+                        alert("❌ Error: " + (response ? response.error : 'Desconocido'));
+                    }
+                })
+                .withFailureHandler(function(err) {
+                    isProcessing = false;
+                    document.getElementById('overlay-status').classList.add('hidden');
+                    alert("Error de red");
+                })
+                .registrarTransaccion(data);
+        }
+
+        // --- UTILIDADES UI ---
+        function showStatus(type, msg) {
+            const overlay = document.getElementById('overlay-status');
+            const icon = document.getElementById('status-icon');
+            const title = document.getElementById('status-title');
+            const message = document.getElementById('status-msg');
+            
+            overlay.classList.remove('hidden');
+            title.className = "font-bold text-xl mb-2"; 
+            
+            if (type === 'loading') {
+                icon.innerText = ''; icon.className = "text-5xl mb-4 animate-pulse text-blue-500";
+                title.innerText = 'Procesando...'; title.classList.add('text-slate-800');
+                message.innerText = msg;
+            } else if (type === 'error') {
+                icon.innerText = '❌'; icon.className = "text-5xl mb-4 text-red-500";
+                title.innerText = 'Error'; title.classList.add('text-red-600');
+                message.innerText = msg;
+            }
+        }
+
+        // Enter key en inputs
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('pin-input').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') loginDocente();
+            });
+            document.getElementById('student-id-input').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') buscarAlumno();
+            });
+        });
+    </script>
+</body>
+</html>
