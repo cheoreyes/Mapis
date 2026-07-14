@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base target="_top">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Iconos Phosphor -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <style>
+        body { font-family: 'Inter', system-ui, sans-serif; background-color: #f8fafc; touch-action: manipulation; }
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Gráfico Circular */
+        .circle-chart { transform: rotate(-90deg); transform-origin: 50% 50%; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-slate-50">
+
+    <!-- PANTALLA DE LOGIN -->
+    <div id="login-screen" class="fixed inset-0 z-50 bg-white flex flex-col items-center justify-center p-6 fade-in">
+        <div class="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center text-white text-4xl font-bold shadow-xl mb-6">M</div>
+        <h1 class="text-2xl font-bold text-slate-800 mb-2">MAPIS Estudiante</h1>
+        <p class="text-slate-500 text-center mb-8 text-sm">Ingresa tu código para ver tus créditos</p>
+        
+        <div class="w-full max-w-xs space-y-4">
+            <input type="text" id="student-login-id" 
+                class="w-full px-4 py-3 border border-slate-300 rounded-xl text-center text-lg tracking-widest uppercase focus:ring-2 focus:ring-blue-500 outline-none transition" 
+                placeholder="TU CÓDIGO AQUÍ" value="EST001">
+            
+            <button onclick="loginStudent()" 
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-blue-500/30 transition active:scale-95">
+                Entrar
+            </button>
+        </div>
+        <p class="mt-8 text-xs text-slate-400">v1.2 - Colegio Experimental</p>
+    </div>
+
+    <!-- DASHBOARD DEL ESTUDIANTE -->
+    <div id="dashboard-screen" class="hidden flex-col min-h-screen pb-20">
+        
+        <!-- Header Simple -->
+        <header class="bg-white p-4 shadow-sm flex justify-between items-center sticky top-0 z-10">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xs">M</div>
+                <span class="font-bold text-slate-700">Mi Perfil</span>
+            </div>
+            <button onclick="logout()" class="text-xs text-red-500 font-bold bg-red-50 px-3 py-1 rounded-lg">Salir</button>
+        </header>
+
+        <main class="flex-1 p-4 max-w-md mx-auto w-full space-y-6">
+            
+            <!-- Tarjeta Principal de Saldo -->
+            <div class="bg-white rounded-3xl p-6 shadow-lg border border-slate-100 text-center relative overflow-hidden fade-in">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-full mix-blend-multiply filter blur-2xl opacity-70 -translate-y-1/2 translate-x-1/2"></div>
+                
+                <div class="relative z-10 flex flex-col items-center">
+                    <!-- IMAGEN DINÁMICA -->
+                    <img id="stu-avatar" src="" class="w-24 h-24 rounded-full border-4 border-white shadow-md bg-gray-100 mb-3 object-cover">
+                    
+                    <h2 id="stu-name" class="text-xl font-black text-slate-800 leading-tight">Cargando...</h2>
+                    <p id="stu-grade" class="text-slate-500 text-xs font-medium mt-1 uppercase tracking-wide">--</p>
+                    
+                    <div id="stu-rank-badge" class="mt-3 bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-[10px] font-bold border border-yellow-200 hidden">
+                        MENTOR MAPIS
+                    </div>
+                </div>
+
+                <!-- Gráfico Circular Grande -->
+                <div class="my-8 relative w-48 h-48 mx-auto">
+                    <svg viewBox="0 0 36 36" class="w-full h-full circle-chart drop-shadow-xl">
+                        <path class="text-slate-100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3" />
+                        <path id="progress-circle" class="text-emerald-500 transition-all duration-1000 ease-out" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+                    </svg>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Créditos</span>
+                        <span id="stu-balance" class="text-5xl font-black text-slate-800">0</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 w-full">
+                    <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                        <p class="text-[10px] text-slate-400 font-bold uppercase">Esta Semana</p>
+                        <p class="text-lg font-bold text-emerald-600">+60</p>
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                        <p class="text-[10px] text-slate-400 font-bold uppercase">Conductas +</p>
+                        <p class="text-lg font-bold text-slate-700">14</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Historial Reciente -->
+            <div class="space-y-3 fade-in" style="animation-delay: 0.1s;">
+                <h3 class="text-sm font-bold text-slate-700 ml-1">Actividad Reciente</h3>
+                
+                <div id="history-list" class="space-y-2">
+                    <div class="p-4 bg-white rounded-2xl border border-slate-100 text-center text-slate-400 text-sm">
+                        Cargando historial...
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- LÓGICA JAVASCRIPT -->
+    <script>
+        let currentHash = null;
+
+        function loginStudent() {
+            const inputId = document.getElementById('student-login-id').value.trim();
+            if (!inputId) return alert("Ingresa un código");
+
+            currentHash = inputId;
+            
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('dashboard-screen').classList.remove('hidden');
+            document.getElementById('dashboard-screen').classList.add('flex');
+
+            fetchStudentData(currentHash);
+        }
+
+        function fetchStudentData(hash) {
+            google.script.run
+                .withSuccessHandler(renderDashboard)
+                .withFailureHandler(function(err) {
+                    alert("Error de conexión: " + err);
+                    logout();
+                })
+                .obtenerDatosEstudiante(hash);
+        }
+
+        function renderDashboard(data) {
+            if (data.error) {
+                alert("Estudiante no encontrado: " + data.error);
+                logout();
+                return;
+            }
+
+            // Actualizar textos
+            document.getElementById('stu-name').innerText = data.nombre;
+            document.getElementById('stu-grade').innerText = data.grado;
+            document.getElementById('stu-balance').innerText = data.saldo;
+
+            // ACTUALIZAR FOTO DE PERFIL
+            const avatarImg = document.getElementById('stu-avatar');
+            // Agregamos ?t=timestamp para evitar caché del navegador si cambias la foto
+            avatarImg.src = data.foto + '?t=' + new Date().getTime();
+
+            // Actualizar Rango (Badge)
+            const badge = document.getElementById('stu-rank-badge');
+            if (data.rango && data.rango !== "Novato") {
+                badge.innerText = data.rango.toUpperCase();
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+
+            // Animar Gráfico Circular (Max 1000 pts para demo)
+            const maxPoints = 1000; 
+            const percentage = Math.min((data.saldo / maxPoints) * 100, 100);
+            setTimeout(() => {
+                document.getElementById('progress-circle').setAttribute('stroke-dasharray', `${percentage}, 100`);
+            }, 100);
+
+            // Renderizar Historial
+            const listContainer = document.getElementById('history-list');
+            listContainer.innerHTML = ''; 
+
+            if (!data.historial || data.historial.length === 0) {
+                listContainer.innerHTML = '<div class="p-4 bg-white rounded-2xl border border-slate-100 text-center text-slate-400 text-sm">Sin movimientos recientes</div>';
+                return;
+            }
+
+            data.historial.forEach(item => {
+                const isPositive = item.puntos > 0;
+                const colorClass = isPositive ? 'text-emerald-600 bg-emerald-50' : 'text-red-600 bg-red-50';
+                const icon = isPositive ? 'ph-check-circle' : 'ph-warning-circle';
+                const sign = isPositive ? '+' : '';
+
+                const html = `
+                    <div class="flex items-center justify-between p-3 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 ${colorClass} rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="ph-fill ${icon} text-sm"></i>
+                            </div>
+                            <div>
+                                <p class="font-bold text-xs text-slate-800 uppercase">${item.descripcion}</p>
+                                <p class="text-[10px] text-slate-400">${item.fecha} • ${item.responsable}</p>
+                            </div>
+                        </div>
+                        <span class="font-bold text-sm ${isPositive ? 'text-emerald-600' : 'text-red-600'}">${sign}${item.puntos}</span>
+                    </div>
+                `;
+                listContainer.innerHTML += html;
+            });
+        }
+
+        function logout() {
+            currentHash = null;
+            document.getElementById('dashboard-screen').classList.add('hidden');
+            document.getElementById('dashboard-screen').classList.remove('flex');
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('student-login-id').value = '';
+            document.getElementById('student-login-id').focus();
+        }
+    </script>
+</body>
+</html>
