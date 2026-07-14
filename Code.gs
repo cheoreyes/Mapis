@@ -1,6 +1,5 @@
 /**
- * MAPIS MVP - BACKEND GOOGLE APPS SCRIPT
- * Versión: 2.0 (Auth Docente + Datos Reales + Fotos)
+ * MAPIS MVP - BACKEND COMPLETO V2.5 (Con Toast Logic)
  */
 
 // ============================================================================
@@ -24,96 +23,104 @@ function doGet(e) {
 }
 
 // ============================================================================
-// 2. API DOCENTE: VALIDAR PIN DE ACCESO
-// Busca en la hoja 'DOCENTES' si el PIN es válido
+// 2. OBTENER LISTA DE ALUMNOS (Para el buscador por nombre)
+// ============================================================================
+function obtenerListaAlumnos() {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheetEst = ss.getSheetByName('ESTUDIANTES');
+    if (!sheetEst) return [];
+    
+    const datos = sheetEst.getDataRange().getValues();
+    const lista = [];
+    
+    // Saltamos encabezado (i=1)
+    for (let i = 1; i < datos.length; i++) {
+      // Solo agregamos si tiene nombre y hash
+      if(datos[i][1] && datos[i][5]) {
+        lista.push({
+          id: datos[i][0],       // Columna A
+          nombre: datos[i][1],   // Columna B (Nombre Completo)
+          hash: datos[i][5]      // Columna F (Hash QR)
+        });
+      }
+    }
+    return lista;
+  } catch (e) {
+    Logger.log("Error obteniendo lista: " + e.toString());
+    return [];
+  }
+}
+
+// ============================================================================
+// 3. VALIDAR PIN DOCENTE
 // ============================================================================
 function validarPinDocente(pinIngresado) {
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const sheetDoc = ss.getSheetByName('DOCENTES');
-    
     if (!sheetDoc) return { success: false, error: "Hoja DOCENTES no encontrada" };
     
     const docentes = sheetDoc.getDataRange().getValues();
-    
-    // Recorremos buscando coincidencia (Columna C = índice 2 es el PIN)
     for (let i = 1; i < docentes.length; i++) {
-      // Convertimos a string para evitar errores de formato numérico
       if (String(docentes[i][2]).trim() === String(pinIngresado).trim()) {
-        return { 
-          success: true, 
-          idDocente: docentes[i][0], // Columna A
-          nombreDocente: docentes[i][1] // Columna B
-        };
+        return { success: true, idDocente: docentes[i][0], nombreDocente: docentes[i][1] };
       }
     }
-    
     return { success: false, error: "PIN incorrecto o no registrado" };
-    
   } catch (err) {
     return { success: false, error: err.toString() };
   }
 }
 
 // ============================================================================
-// 3. API DOCENTE: BUSCAR ESTUDIANTE (DATOS REALES + FOTO)
+// 4. BUSCAR ESTUDIANTE POR HASH (Detalles completos)
 // ============================================================================
-function buscarEstudianteReal(hashQR) {
+function buscarEstudiantePorHash(hashQR) {
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const sheetEst = ss.getSheetByName('ESTUDIANTES');
-    
     if (!sheetEst) return { success: false, error: "Hoja ESTUDIANTES no encontrada" };
     
     const estudiantes = sheetEst.getDataRange().getValues();
-    
     for (let i = 1; i < estudiantes.length; i++) {
-      // Columna F (índice 5) es el Hash QR
       if (String(estudiantes[i][5]).trim() === String(hashQR).trim()) { 
-        
-        // Obtener foto (Columna G, índice 6)
-        let fotoUrl = estudiantes[i][6];
+        let fotoUrl = estudiantes[i][6]; // Columna G
         if (!fotoUrl || String(fotoUrl).trim() === "") {
-           // Avatar por defecto basado en nombre si no hay foto
            fotoUrl = "https://api.dicebear.com/7.x/avataaars/svg?seed=" + encodeURIComponent(estudiantes[i][1]) + "&backgroundColor=c0c0c0";
         }
-
         return {
             success: true,
-            idEstudiante: estudiantes[i][0], // Columna A
-            nombre: estudiantes[i][1],       // Columna B
-            grado: estudiantes[i][2],        // Columna C
-            saldo: Number(estudiantes[i][3]),// Columna D
-            rango: estudiantes[i][4],        // Columna E
-            foto: fotoUrl
+            idEstudiante: estudiantes[i][0],
+            nombre: estudiantes[i][1],
+            grado: estudiantes[i][2],
+            saldo: Number(estudiantes[i][3]),
+            rango: estudiantes[i][4],
+            foto: fotoUrl,
+            hash: estudiantes[i][5] // Importante devolver el hash para usarlo al registrar
         };
       }
     }
-    
-    return { success: false, error: "Estudiante no encontrado con ese ID/QR" };
-    
+    return { success: false, error: "Alumno no encontrado" };
   } catch (err) {
     return { success: false, error: err.toString() };
   }
 }
 
 // ============================================================================
-// 4. API DOCENTE: REGISTRAR TRANSACCIÓN (CON AUTH)
+// 5. REGISTRAR TRANSACCIÓN
 // ============================================================================
 function registrarTransaccion(data) {
   const lock = LockService.getScriptLock();
   try {
     lock.waitLock(5000); 
-    
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const sheetTrans = ss.getSheetByName('TRANSACCIONES');
     const sheetEst = ss.getSheetByName('ESTUDIANTES');
     
-    if (!sheetTrans || !sheetEst) {
-      return { success: false, error: "Error BD: Faltan hojas" };
-    }
+    if (!sheetTrans || !sheetEst) return { success: false, error: "Error de configuración en BD" };
     
-    // Buscar estudiante para obtener fila y saldo actual
+    // Buscar fila del estudiante por Hash
     const estudiantes = sheetEst.getDataRange().getValues();
     let filaEstudiante = -1;
     let saldoActual = 0;
@@ -128,28 +135,26 @@ function registrarTransaccion(data) {
       }
     }
     
-    if (filaEstudiante === -1) {
-      return { success: false, error: "Estudiante no encontrado (posible cambio de ID)" };
-    }
+    if (filaEstudiante === -1) return { success: false, error: "Alumno no encontrado (posible cambio de ID)" };
     
-    // Calcular y actualizar saldo
     const puntos = Number(data.puntos);
     const nuevoSaldo = saldoActual + puntos;
+    
+    // Actualizar saldo
     sheetEst.getRange(filaEstudiante, 4).setValue(nuevoSaldo);
     
-    // Registrar en Ledger
+    // Registrar en Ledger (Append-only)
     sheetTrans.appendRow([
-      new Date(),
-      nombreEstudiante,
-      data.idDocente || 'DOC-UNKNOWN', // Usamos el ID real del docente logueado
-      data.tipoConducta,
-      puntos,
-      data.nota || "",
+      new Date(), 
+      nombreEstudiante, 
+      data.idDocente || 'DOC-UNKNOWN',
+      data.tipoConducta, 
+      puntos, 
+      "", // Nota vacía por defecto en esta versión rápida
       data.categoria || "General"
     ]);
     
-    return { success: true, nuevoSaldo: nuevoSaldo };
-    
+    return { success: true, nuevoSaldo: nuevoSaldo, nombre: nombreEstudiante };
   } catch (err) {
     return { success: false, error: err.toString() };
   } finally {
@@ -158,7 +163,7 @@ function registrarTransaccion(data) {
 }
 
 // ============================================================================
-// 5. API ESTUDIANTE: CONSULTAR DATOS (Sin cambios mayores)
+// 6. OBTENER DATOS ESTUDIANTE (Con estadísticas dinámicas)
 // ============================================================================
 function obtenerDatosEstudiante(hashQR) {
   try {
@@ -168,6 +173,7 @@ function obtenerDatosEstudiante(hashQR) {
     
     if (!sheetEst || !sheetTrans) return { error: "BD no configurada" };
     
+    // Buscar estudiante
     const estudiantes = sheetEst.getDataRange().getValues();
     let datosEst = null;
     
@@ -177,37 +183,66 @@ function obtenerDatosEstudiante(hashQR) {
         if (!fotoUrl || String(fotoUrl).trim() === "") {
            fotoUrl = "https://api.dicebear.com/7.x/avataaars/svg?seed=" + encodeURIComponent(estudiantes[i][1]) + "&backgroundColor=c0c0c0";
         }
-
-        datosEst = {
-          nombre: estudiantes[i][1],
-          grado: estudiantes[i][2],
-          saldo: Number(estudiantes[i][3]),
-          rango: estudiantes[i][4],
-          foto: fotoUrl
+        datosEst = { 
+          nombre: estudiantes[i][1], 
+          grado: estudiantes[i][2], 
+          saldo: Number(estudiantes[i][3]), 
+          rango: estudiantes[i][4], 
+          foto: fotoUrl 
         };
         break;
       }
     }
     
-    if (!datosEst) return { error: "Estudiante no encontrado" };
+    if (!datosEst) return { error: "No encontrado" };
     
+    // Calcular Estadísticas
     const transacciones = sheetTrans.getDataRange().getValues();
     const historial = [];
+    let puntosSemana = 0;
+    let conductasPositivas = 0;
     
-    for (let i = transacciones.length - 1; i >= 1 && historial.length < 10; i--) {
-      if (String(transacciones[i][1]) === String(datosEst.nombre)) {
-        historial.push({
-          fecha: Utilities.formatDate(new Date(transacciones[i][0]), Session.getScriptTimeZone(), "dd/MM hh:mm"),
-          descripcion: transacciones[i][3],
-          puntos: Number(transacciones[i][4]),
-          responsable: transacciones[i][2]
-        });
+    const hoy = new Date();
+    const hace7Dias = new Date(hoy.getTime() - (7 * 24 * 60 * 60 * 1000));
+    
+    // Recorrer desde el final (más reciente)
+    for (let i = transacciones.length - 1; i >= 1; i--) {
+      const row = transacciones[i];
+      const fechaTrans = new Date(row[0]);
+      const nombreTrans = String(row[1]);
+      const puntosTrans = Number(row[4]);
+      
+      if (nombreTrans === datosEst.nombre) {
+        // Historial (limitado a 10)
+        if (historial.length < 10) {
+            historial.push({
+              fecha: Utilities.formatDate(fechaTrans, Session.getScriptTimeZone(), "dd/MM hh:mm"),
+              descripcion: row[3],
+              puntos: puntosTrans,
+              responsable: row[2]
+            });
+        }
+        
+        // Puntos últimos 7 días
+        if (fechaTrans >= hace7Dias) {
+            puntosSemana += puntosTrans;
+        }
+        
+        // Conteo total de conductas positivas
+        if (puntosTrans > 0) {
+            conductasPositivas++;
+        }
       }
     }
     
-    return { ...datosEst, historial: historial };
+    return { 
+        ...datosEst, 
+        historial: historial,
+        puntosSemana: puntosSemana,
+        conductasPositivas: conductasPositivas
+    };
     
-  } catch (err) {
-    return { error: err.toString() };
+  } catch (err) { 
+      return { error: err.toString() }; 
   }
 }
