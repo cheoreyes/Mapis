@@ -1,187 +1,611 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <base target="_top">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <style>
-        body { font-family: 'Inter', system-ui, sans-serif; background-color: #f8fafc; }
-        .circle-chart { transform: rotate(-90deg); transform-origin: 50% 50%; }
-    </style>
+<base target="_top">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/cheoreyes/Mapis_image/main/insignia.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://raw.githubusercontent.com/cheoreyes/Mapis_image/main/insignia.png">
+<link rel="manifest" href='data:application/manifest+json,{"name":"MAPIS","short_name":"MAPIS","start_url":".","display":"standalone","background_color":"#2a3376","theme_color":"#2a3376","icons":[{"src":"https://raw.githubusercontent.com/cheoreyes/Mapis_image/main/insignia.png","sizes":"192x192","type":"image/png"},{"src":"https://raw.githubusercontent.com/cheoreyes/Mapis_image/main/insignia.png","sizes":"512x512","type":"image/png"}]}'>
+<meta name="theme-color" content="#2a3376">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MAPIS">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<script>
+tailwind.config = {
+theme: {
+extend: {
+colors: {
+mapis: { dark: '#2a3376', mid: '#1f2860', light: '#e8ebf7', gold: '#fcb713', goldDark: '#d99e0a' }
+}
+}
+}
+}
+</script>
+<style>
+body { font-family: 'Inter', system-ui, sans-serif; background-color: #f8fafc; }
+.circle-chart { transform: rotate(-90deg); transform-origin: 50% 50%; }
+.fade-in { animation: fadeIn 0.3s ease-out forwards; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+</style>
 </head>
 <body class="min-h-screen flex flex-col bg-slate-50">
 
-    <!-- PANTALLA LOGIN ESTUDIANTE -->
-    <div id="login-screen" class="fixed inset-0 z-50 bg-white flex flex-col items-center justify-center p-6">
-        <div class="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center text-white text-4xl font-bold shadow-xl mb-6">M</div>
-        <h1 class="text-2xl font-bold text-slate-800 mb-2">MAPIS Estudiante</h1>
-        <p class="text-slate-500 text-center mb-8 text-sm">Ingresa tu código para ver tus créditos</p>
-        
-        <div class="w-full max-w-xs space-y-4">
-            <input type="text" id="student-login-id" 
-                class="w-full px-4 py-3 border border-slate-300 rounded-xl text-center text-lg tracking-widest uppercase focus:ring-2 focus:ring-blue-500 outline-none transition" 
-                placeholder="TU CÓDIGO" value="EST001">
-            
-            <button onclick="loginStudent()" 
-                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-lg transition active:scale-95">
-                Entrar
-            </button>
+<div id="login-screen" class="fixed inset-0 z-50 bg-gradient-to-br from-mapis-dark via-mapis-mid to-mapis-dark flex flex-col items-center justify-center p-6 fade-in">
+  <div class="w-24 h-24 bg-white rounded-3xl flex items-center justify-center shadow-2xl mb-6 border-4 border-mapis-gold/30 overflow-hidden">
+    <img src="https://raw.githubusercontent.com/cheoreyes/Mapis_image/main/insignia.png" alt="MAPIS" class="w-full h-full object-cover">
+  </div>
+  <h1 class="text-2xl font-black text-white mb-1">MAPIS Estudiante</h1>
+  <p class="text-white/70 text-center mb-8 text-xs uppercase tracking-widest">U.E. Mariano Picón Salas</p>
+  
+  <div class="w-full max-w-xs space-y-4">
+    <input type="text" id="student-login-id" autocomplete="off"
+      class="w-full px-4 py-4 border-2 border-white/30 rounded-2xl text-center text-lg tracking-widest uppercase bg-white/10 text-white placeholder-white/50 focus:border-mapis-gold focus:bg-white/20 outline-none transition font-bold"
+      placeholder="TU CÓDIGO">
+    <p class="text-[11px] text-white/60 text-center -mt-2">Ingresa tu ID único o código de registro</p>
+    
+    <button onclick="loginStudent()"
+      class="w-full bg-mapis-gold hover:bg-mapis-goldDark text-mapis-dark font-black py-4 rounded-2xl shadow-xl transition active:scale-95">
+      Ver mi perfil
+    </button>
+  </div>
+  <p class="text-white/40 text-[10px] absolute bottom-6">#SomosMapis · Los Robles, Nueva Esparta</p>
+</div>
+
+<div id="dashboard-screen" class="hidden flex-col min-h-screen pb-20 fade-in">
+  <header class="bg-gradient-to-r from-mapis-dark to-mapis-mid p-4 shadow-lg flex justify-between items-center sticky top-0 z-10 text-white">
+    <div class="flex items-center gap-2">
+      <img src="https://raw.githubusercontent.com/cheoreyes/Mapis_image/main/insignia.png" alt="MAPIS" class="w-8 h-8 rounded-lg object-cover border border-white/30">
+      <div class="flex flex-col leading-tight">
+        <span class="font-bold text-sm">Mi Perfil</span>
+        <span class="text-[9px] opacity-75">MAPIS Estudiante</span>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button onclick="abrirNotificaciones()" class="relative text-white bg-white/15 hover:bg-white/25 p-2 rounded-lg transition">
+        <i class="ph-bold ph-bell text-lg"></i>
+        <span id="notif-badge" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">0</span>
+      </button>
+      <button onclick="logout()" class="text-xs text-white font-bold bg-white/15 hover:bg-white/25 px-3 py-1.5 rounded-lg transition flex items-center gap-1">
+        <i class="ph-bold ph-sign-out"></i> Salir
+      </button>
+    </div>
+  </header>
+
+  <main class="flex-1 p-4 max-w-md mx-auto w-full space-y-6">
+    <div class="bg-white rounded-3xl p-6 shadow-lg border border-slate-100 text-center relative overflow-hidden">
+      <div class="absolute top-0 right-0 w-32 h-32 bg-mapis-light rounded-full mix-blend-multiply filter blur-2xl opacity-70 -translate-y-1/2 translate-x-1/2"></div>
+      
+      <div class="relative z-10 flex flex-col items-center">
+        <img id="stu-avatar" src="https://raw.githubusercontent.com/cheoreyes/Mapis_image/main/insignia.png" class="w-24 h-24 rounded-full border-4 border-white shadow-md bg-gray-100 mb-3 object-cover">
+        <h2 id="stu-name" class="text-xl font-black text-slate-800 leading-tight">Cargando...</h2>
+        <p id="stu-grade" class="text-slate-500 text-xs font-medium mt-1 uppercase tracking-wide">--</p>
+        <div id="stu-rank-badge" class="mt-2 bg-mapis-gold text-mapis-dark px-3 py-1 rounded-full text-[10px] font-black border border-amber-300 hidden">MENTOR</div>
+      </div>
+
+      <div class="my-8 relative w-48 h-48 mx-auto">
+        <svg viewBox="0 0 36 36" class="w-full h-full circle-chart drop-shadow-xl">
+          <path class="text-slate-100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3" />
+          <path id="progress-circle" class="text-mapis-dark transition-all duration-1000 ease-out" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+        </svg>
+        <div class="absolute inset-0 flex flex-col items-center justify-center">
+          <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Créditos</span>
+          <span id="stu-balance" class="text-5xl font-black text-mapis-dark">0</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3 w-full">
+        <div class="bg-mapis-light p-3 rounded-2xl border border-mapis-dark/10">
+          <p class="text-[10px] text-mapis-dark font-bold uppercase">Esta Semana</p>
+          <p id="stat-week" class="text-lg font-black text-mapis-dark">+0</p>
+        </div>
+        <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100">
+          <p class="text-[10px] text-slate-400 font-bold uppercase">Incidencias</p>
+          <p id="stat-count" class="text-lg font-black text-slate-700">0</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="space-y-3 mt-4">
+        <h3 class="text-sm font-black text-mapis-dark ml-1 flex items-center gap-2"><i class="ph-fill ph-storefront"></i> Premios Disponibles</h3>
+        <div id="marketplace-list" class="grid grid-cols-1 gap-3">
+            <div class="p-4 bg-white rounded-2xl border border-slate-100 text-center text-slate-400 text-sm">Cargando premios...</div>
         </div>
     </div>
 
-    <!-- DASHBOARD ESTUDIANTE -->
-    <div id="dashboard-screen" class="hidden flex-col min-h-screen pb-20">
-        <header class="bg-white p-4 shadow-sm flex justify-between items-center sticky top-0 z-10">
-            <div class="flex items-center gap-2">
-                <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xs">M</div>
-                <span class="font-bold text-slate-700">Mi Perfil</span>
-            </div>
-            <button onclick="logout()" class="text-xs text-red-500 font-bold bg-red-50 px-3 py-1 rounded-lg">Salir</button>
-        </header>
-
-        <main class="flex-1 p-4 max-w-md mx-auto w-full space-y-6">
-            
-            <!-- Tarjeta Principal -->
-            <div class="bg-white rounded-3xl p-6 shadow-lg border border-slate-100 text-center relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-full mix-blend-multiply filter blur-2xl opacity-70 -translate-y-1/2 translate-x-1/2"></div>
-                
-                <div class="relative z-10 flex flex-col items-center">
-                    <img id="stu-avatar" src="" class="w-24 h-24 rounded-full border-4 border-white shadow-md bg-gray-100 mb-3 object-cover">
-                    <h2 id="stu-name" class="text-xl font-black text-slate-800 leading-tight">Cargando...</h2>
-                    <p id="stu-grade" class="text-slate-500 text-xs font-medium mt-1 uppercase tracking-wide">--</p>
-                    
-                    <div id="stu-rank-badge" class="mt-2 bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-[10px] font-bold border border-yellow-200 hidden">MENTOR</div>
-                </div>
-
-                <!-- Gráfico Circular -->
-                <div class="my-8 relative w-48 h-48 mx-auto">
-                    <svg viewBox="0 0 36 36" class="w-full h-full circle-chart drop-shadow-xl">
-                        <path class="text-slate-100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3" />
-                        <path id="progress-circle" class="text-emerald-500 transition-all duration-1000 ease-out" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
-                    </svg>
-                    <div class="absolute inset-0 flex flex-col items-center justify-center">
-                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Créditos</span>
-                        <span id="stu-balance" class="text-5xl font-black text-slate-800">0</span>
-                    </div>
-                </div>
-
-                <!-- ESTADÍSTICAS DINÁMICAS -->
-                <div class="grid grid-cols-2 gap-3 w-full">
-                    <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100">
-                        <p class="text-[10px] text-slate-400 font-bold uppercase">Esta Semana</p>
-                        <p id="stat-week" class="text-lg font-bold text-emerald-600">+0</p>
-                    </div>
-                    <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100">
-                        <p class="text-[10px] text-slate-400 font-bold uppercase">Conductas +</p>
-                        <p id="stat-count" class="text-lg font-bold text-slate-700">0</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Historial Reciente -->
-            <div class="space-y-3">
-                <h3 class="text-sm font-bold text-slate-700 ml-1">Actividad Reciente</h3>
-                <div id="history-list" class="space-y-2">
-                    <div class="p-4 bg-white rounded-2xl border border-slate-100 text-center text-slate-400 text-sm">Cargando historial...</div>
-                </div>
-            </div>
-        </main>
+    <div class="space-y-3 mt-8 mb-10">
+      <h3 class="text-sm font-black text-slate-700 ml-1 flex items-center gap-2"><i class="ph-fill ph-clock-counter-clockwise text-slate-600"></i> Historial</h3>
+      <div id="history-list" class="space-y-2">
+        <div class="p-4 bg-white rounded-2xl border border-slate-100 text-center text-slate-400 text-sm">Cargando historial...</div>
+      </div>
     </div>
 
-    <script>
-        let currentHash = null;
+    <div class="mt-4 mb-10">
+      <button onclick="abrirBuzonEstudiante()" class="w-full bg-mapis-gold text-mapis-dark font-bold py-3 rounded-xl hover:bg-mapis-goldDark transition flex items-center justify-center gap-2 shadow-md">
+        <i class="ph-fill ph-chat-circle-dots text-lg"></i> Enviar Sugerencia
+      </button>
+    </div>
+  </main>
+</div>
 
-        function loginStudent() {
-            const inputId = document.getElementById('student-login-id').value.trim();
-            if (!inputId) return alert("Ingresa un código");
-            currentHash = inputId;
+<div id="mapis-confirm" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4" style="background: rgba(15,23,42,0.7); backdrop-filter: blur(6px);">
+  <div id="mapis-confirm-card" class="bg-white rounded-3xl shadow-2xl w-full max-w-sm transform scale-95 opacity-0 transition-all duration-300 overflow-hidden">
+    <div id="mapis-confirm-bar" class="h-1.5 bg-gradient-to-r from-mapis-dark to-mapis-gold"></div>
+    <div class="p-6 text-center">
+      <div id="mapis-confirm-icon-wrap" class="w-16 h-16 mx-auto mb-4 rounded-full bg-mapis-light flex items-center justify-center"><i id="mapis-confirm-icon" class="ph-fill ph-question text-mapis-dark text-3xl"></i></div>
+      <h3 id="mapis-confirm-title" class="text-lg font-black text-slate-800 mb-2">Confirmar acción</h3>
+      <p id="mapis-confirm-message" class="text-sm text-slate-500 leading-relaxed mb-6">¿Estás seguro?</p>
+      <div class="flex gap-3">
+        <button onclick="mapisConfirmCancel()" id="mapis-confirm-cancel-btn" class="flex-1 py-3 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition active:scale-95">Cancelar</button>
+        <button onclick="mapisConfirmAccept()" id="mapis-confirm-btn" class="flex-1 py-3 px-4 bg-mapis-dark hover:bg-mapis-mid text-white font-bold rounded-xl shadow-lg transition active:scale-95">Aceptar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="mapis-alert" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4" style="background: rgba(15,23,42,0.7); backdrop-filter: blur(6px);">
+  <div id="mapis-alert-card" class="bg-white rounded-3xl shadow-2xl w-full max-w-sm transform scale-95 opacity-0 transition-all duration-300 overflow-hidden">
+    <div id="mapis-alert-bar" class="h-1.5 bg-mapis-dark"></div>
+    <div class="p-6 text-center">
+      <div id="mapis-alert-icon-wrap" class="w-16 h-16 mx-auto mb-4 rounded-full bg-mapis-light flex items-center justify-center"><i id="mapis-alert-icon" class="ph-fill ph-info text-mapis-dark text-3xl"></i></div>
+      <h3 id="mapis-alert-title" class="text-lg font-black text-slate-800 mb-2">Información</h3>
+      <p id="mapis-alert-message" class="text-sm text-slate-500 leading-relaxed mb-6">Mensaje del sistema</p>
+      <button onclick="mapisAlertClose()" class="w-full py-3 px-4 bg-mapis-dark hover:bg-mapis-mid text-white font-bold rounded-xl shadow-lg transition active:scale-95">Entendido</button>
+    </div>
+  </div>
+</div>
+
+<div id="mapis-loading" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4" style="background: rgba(15,23,42,0.75); backdrop-filter: blur(6px);">
+  <div class="bg-white rounded-3xl shadow-2xl p-8 text-center max-w-xs mx-4">
+    <div class="relative w-20 h-20 mx-auto mb-4">
+      <div class="absolute inset-0 rounded-full border-4 border-mapis-light"></div>
+      <div class="absolute inset-0 rounded-full border-4 border-transparent border-t-mapis-dark animate-spin"></div>
+      <div class="absolute inset-0 flex items-center justify-center"><span class="text-mapis-dark text-2xl font-black">M</span></div>
+    </div>
+    <h3 id="mapis-loading-title" class="font-black text-base text-slate-800">Cargando...</h3>
+    <p id="mapis-loading-msg" class="text-xs text-slate-500 mt-1">Procesando solicitud</p>
+  </div>
+</div>
+
+<div id="buzon-modal" class="hidden fixed inset-0 z-[120] flex items-center justify-center p-4" style="background: rgba(15,23,42,0.85);">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md">
+        <div class="bg-gradient-to-r from-mapis-gold to-mapis-goldDark text-mapis-dark p-4 flex justify-between items-center rounded-t-3xl">
+            <div class="flex items-center gap-2">
+                <i class="ph-fill ph-chat-circle-dots text-xl"></i>
+                <span class="font-bold text-sm">Buzón de Sugerencias</span>
+            </div>
+            <button onclick="cerrarBuzonEstudiante()" class="text-mapis-dark/70 hover:text-mapis-dark"><i class="ph-bold ph-x text-xl"></i></button>
+        </div>
+        
+        <div class="p-5 space-y-3">
+            <p class="text-xs text-slate-500">Tu opinión nos ayuda a mejorar MAPIS. Cuéntanos qué ideas tienes o qué problemas has visto.</p>
             
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('dashboard-screen').classList.remove('hidden');
-            document.getElementById('dashboard-screen').classList.add('flex');
-            fetchStudentData(currentHash);
-        }
-
-        function fetchStudentData(hash) {
-            google.script.run
-                .withSuccessHandler(renderDashboard)
-                .withFailureHandler(function(err) { alert("Error: " + err); logout(); })
-                .obtenerDatosEstudiante(hash);
-        }
-
-        function renderDashboard(data) {
-            if (data.error) { alert("No encontrado: " + data.error); logout(); return; }
-
-            // Datos Básicos
-            document.getElementById('stu-name').innerText = data.nombre;
-            document.getElementById('stu-grade').innerText = data.grado;
-            document.getElementById('stu-balance').innerText = data.saldo;
+            <div>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Tipo</label>
+                <select id="buzon-tipo" class="w-full p-2 border border-slate-300 rounded-lg text-sm">
+                    <option value="Sugerencia">💡 Sugerencia</option>
+                    <option value="Propuesta">🚀 Propuesta</option>
+                    <option value="Error">🐞 Reporte de Error</option>
+                </select>
+            </div>
             
-            // Foto
-            const avatarImg = document.getElementById('stu-avatar');
-            avatarImg.src = data.foto + '?t=' + new Date().getTime();
-
-            // Rango
-            const badge = document.getElementById('stu-rank-badge');
-            if (data.rango && data.rango !== "Novato") {
-                badge.innerText = data.rango.toUpperCase();
-                badge.classList.remove('hidden');
-            } else {
-                badge.classList.add('hidden');
-            }
-
-            // --- ACTUALIZAR ESTADÍSTICAS DINÁMICAS ---
-            const weekVal = data.puntosSemana || 0;
-            const countVal = data.conductasPositivas || 0;
-
-            document.getElementById('stat-week').innerText = (weekVal > 0 ? '+' : '') + weekVal;
-            document.getElementById('stat-count').innerText = countVal;
+            <div>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Mensaje</label>
+                <textarea id="buzon-mensaje" rows="5" placeholder="Escribe tu sugerencia aquí..."
+                    class="w-full p-3 border border-slate-300 rounded-lg text-sm focus:border-mapis-dark outline-none resize-none"></textarea>
+            </div>
             
-            // Color condicional para semana
-            const weekEl = document.getElementById('stat-week');
-            if(weekVal < 0) {
-                weekEl.classList.remove('text-emerald-600');
-                weekEl.classList.add('text-red-600');
-            } else {
-                weekEl.classList.add('text-emerald-600');
-                weekEl.classList.remove('text-red-600');
-            }
+            <button onclick="enviarSugerenciaEstudiante()" class="w-full bg-mapis-dark text-white py-3 rounded-lg font-bold text-sm hover:bg-mapis-mid">
+                Enviar Sugerencia
+            </button>
+        </div>
+    </div>
+</div>
 
-            // Gráfico Circular
-            const maxPoints = 1000; 
-            const percentage = Math.min((data.saldo / maxPoints) * 100, 100);
-            setTimeout(() => {
-                document.getElementById('progress-circle').setAttribute('stroke-dasharray', `${percentage}, 100`);
-            }, 100);
+<div id="notif-modal" class="hidden fixed inset-0 z-[120] flex items-start justify-center p-4 overflow-y-auto" style="background: rgba(15,23,42,0.85);">
+  <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md my-6">
+    <div class="bg-gradient-to-r from-mapis-dark to-mapis-mid text-white p-4 flex justify-between items-center rounded-t-3xl">
+      <div class="flex items-center gap-2">
+        <i class="ph-fill ph-bell-ringing text-xl"></i>
+        <span class="font-bold text-sm">Notificaciones</span>
+      </div>
+      <button onclick="cerrarNotificaciones()" class="text-white/80 hover:text-white"><i class="ph-bold ph-x text-xl"></i></button>
+    </div>
+    
+    <div class="p-4">
+      <div id="notif-contenedor" class="space-y-2 max-h-[70vh] overflow-y-auto">
+        <p class="text-xs text-slate-400 text-center py-4">Cargando...</p>
+      </div>
+    </div>
+  </div>
+</div>
 
-            // Renderizar Historial
-            const listContainer = document.getElementById('history-list');
-            listContainer.innerHTML = ''; 
-            if (!data.historial || data.historial.length === 0) {
-                listContainer.innerHTML = '<div class="p-4 bg-white rounded-2xl border border-slate-100 text-center text-slate-400 text-sm">Sin movimientos recientes</div>';
+<script>
+let currentHash = null;
+let currentStudentData = null;
+let _mapisConfirmCallback = null;
+
+function mapisConfirm(title, message, options = {}) {
+  return new Promise((resolve) => {
+    const opts = { icon: options.icon || 'ph-question', acceptText: options.acceptText || 'Aceptar', cancelText: options.cancelText || 'Cancelar', danger: options.danger || false };
+    const modal = document.getElementById('mapis-confirm');
+    const card = document.getElementById('mapis-confirm-card');
+    const bar = document.getElementById('mapis-confirm-bar');
+    const iconWrap = document.getElementById('mapis-confirm-icon-wrap');
+    const icon = document.getElementById('mapis-confirm-icon');
+    const acceptBtn = document.getElementById('mapis-confirm-btn');
+    const cancelBtn = document.getElementById('mapis-confirm-cancel-btn');
+    
+    document.getElementById('mapis-confirm-title').innerText = title;
+    document.getElementById('mapis-confirm-message').innerText = message;
+    acceptBtn.innerText = opts.acceptText; cancelBtn.innerText = opts.cancelText;
+    icon.className = `ph-fill ${opts.icon} text-3xl`;
+    
+    if (opts.danger) {
+      bar.className = 'h-1.5 bg-gradient-to-r from-red-500 to-rose-600';
+      iconWrap.className = 'w-16 h-16 mx-auto mb-4 rounded-full bg-red-50 flex items-center justify-center';
+      icon.classList.add('text-red-600'); icon.classList.remove('text-mapis-dark');
+      acceptBtn.className = 'flex-1 py-3 px-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-lg transition active:scale-95';
+    } else {
+      bar.className = 'h-1.5 bg-gradient-to-r from-mapis-dark to-mapis-gold';
+      iconWrap.className = 'w-16 h-16 mx-auto mb-4 rounded-full bg-mapis-light flex items-center justify-center';
+      icon.classList.add('text-mapis-dark'); icon.classList.remove('text-red-600');
+      acceptBtn.className = 'flex-1 py-3 px-4 bg-mapis-dark hover:bg-mapis-mid text-white font-bold rounded-xl shadow-lg transition active:scale-95';
+    }
+    
+    modal.classList.remove('hidden');
+    setTimeout(() => { card.classList.remove('scale-95', 'opacity-0'); card.classList.add('scale-100', 'opacity-100'); }, 10);
+    _mapisConfirmCallback = (accepted) => { card.classList.add('scale-95', 'opacity-0'); setTimeout(() => { modal.classList.add('hidden'); resolve(accepted); }, 250); };
+  });
+}
+function mapisConfirmAccept() { if (_mapisConfirmCallback) _mapisConfirmCallback(true); }
+function mapisConfirmCancel() { if (_mapisConfirmCallback) _mapisConfirmCallback(false); }
+
+function mapisAlert(title, message, options = {}) {
+  return new Promise((resolve) => {
+    const opts = { icon: options.icon || 'ph-info', type: options.type || 'info' };
+    const modal = document.getElementById('mapis-alert');
+    const card = document.getElementById('mapis-alert-card');
+    const bar = document.getElementById('mapis-alert-bar');
+    const iconWrap = document.getElementById('mapis-alert-icon-wrap');
+    const icon = document.getElementById('mapis-alert-icon');
+    
+    document.getElementById('mapis-alert-title').innerText = title;
+    document.getElementById('mapis-alert-message').innerText = message;
+    icon.className = `ph-fill ${opts.icon} text-3xl`;
+    
+    const tipos = {
+      info:    { bar: 'h-1.5 bg-mapis-dark', wrap: 'bg-mapis-light', iconColor: 'text-mapis-dark' },
+      success: { bar: 'h-1.5 bg-gradient-to-r from-emerald-500 to-teal-600', wrap: 'bg-emerald-50', iconColor: 'text-emerald-600' },
+      warning: { bar: 'h-1.5 bg-gradient-to-r from-amber-400 to-mapis-gold', wrap: 'bg-amber-50', iconColor: 'text-amber-600' },
+      error:   { bar: 'h-1.5 bg-gradient-to-r from-red-500 to-rose-600', wrap: 'bg-red-50', iconColor: 'text-red-600' }
+    };
+    const t = tipos[opts.type] || tipos.info;
+    bar.className = t.bar;
+    iconWrap.className = `w-16 h-16 mx-auto mb-4 rounded-full ${t.wrap} flex items-center justify-center`;
+    icon.classList.remove('text-mapis-dark', 'text-emerald-600', 'text-amber-600', 'text-red-600');
+    icon.classList.add(t.iconColor);
+    
+    modal.classList.remove('hidden');
+    setTimeout(() => { card.classList.remove('scale-95', 'opacity-0'); card.classList.add('scale-100', 'opacity-100'); }, 10);
+    window._mapisAlertResolve = () => { card.classList.add('scale-95', 'opacity-0'); setTimeout(() => { modal.classList.add('hidden'); resolve(true); }, 250); };
+  });
+}
+function mapisAlertClose() { if (window._mapisAlertResolve) window._mapisAlertResolve(); }
+
+function mapisLoading(show, title, message) {
+  const modal = document.getElementById('mapis-loading');
+  if (show) { document.getElementById('mapis-loading-title').innerText = title || 'Cargando...'; document.getElementById('mapis-loading-msg').innerText = message || 'Procesando solicitud'; modal.classList.remove('hidden'); } 
+  else { modal.classList.add('hidden'); }
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    if (!document.getElementById('mapis-confirm').classList.contains('hidden')) mapisConfirmCancel();
+    if (!document.getElementById('mapis-alert').classList.contains('hidden')) mapisAlertClose();
+  }
+});
+
+window.onload = function() {
+  const savedId = localStorage.getItem('mapis_student_id');
+  if (savedId) {
+    document.getElementById('student-login-id').value = savedId.toUpperCase();
+  }
+};
+
+async function loginStudent() {
+  let inputId = document.getElementById('student-login-id').value.trim().toUpperCase();
+  if (!inputId) return await mapisAlert('Falta tu código', 'Ingresa tu ID único.', { icon: 'ph-key', type: 'warning' });
+  
+  localStorage.setItem('mapis_student_id', inputId);
+  currentHash = inputId;
+  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('dashboard-screen').classList.remove('hidden');
+  document.getElementById('dashboard-screen').classList.add('flex');
+  
+  fetchStudentData(currentHash);
+}
+
+function fetchStudentData(identificador) {
+  mapisLoading(true, 'Buscando tu perfil...', 'Conectando con MAPIS');
+  google.script.run.withSuccessHandler((data) => { mapisLoading(false); renderDashboard(data); })
+  .withFailureHandler(async (err) => { mapisLoading(false); await mapisAlert('Error', String(err), { icon: 'ph-wifi-slash', type: 'error' }); logout(); })
+  .obtenerDatosEstudiante(identificador);
+}
+
+async function renderDashboard(data) {
+  if (data.error) { await mapisAlert('No encontrado', data.error, { icon: 'ph-user-x', type: 'error' }); logout(); return; }
+
+  currentStudentData = data;
+  document.getElementById('stu-name').innerText = data.nombre;
+  document.getElementById('stu-grade').innerText = data.grado;
+  document.getElementById('stu-balance').innerText = data.saldo;
+
+  const badge = document.getElementById('stu-rank-badge');
+  if (data.rango && data.rango !== "Novato") { badge.innerText = data.rango.toUpperCase(); badge.classList.remove('hidden'); } 
+  else { badge.classList.add('hidden'); }
+
+  const weekVal = data.puntosSemana || 0;
+  const countVal = data.totalIncidencias || 0;
+  document.getElementById('stat-week').innerText = (weekVal > 0 ? '+' : '') + weekVal;
+  document.getElementById('stat-count').innerText = countVal;
+  
+  const weekEl = document.getElementById('stat-week');
+  if (weekVal < 0) { weekEl.classList.remove('text-mapis-dark'); weekEl.classList.add('text-red-600'); } 
+  else { weekEl.classList.add('text-mapis-dark'); weekEl.classList.remove('text-red-600'); }
+
+  const maxPoints = 1000;
+  const percentage = Math.min((data.saldo / maxPoints) * 100, 100);
+  setTimeout(() => { document.getElementById('progress-circle').setAttribute('stroke-dasharray', `${percentage}, 100`); }, 100);
+
+  const listContainer = document.getElementById('history-list');
+  listContainer.innerHTML = '';
+  if (!data.historial || data.historial.length === 0) {
+    listContainer.innerHTML = '<div class="p-4 bg-white rounded-2xl border border-slate-100 text-center text-slate-400 text-sm">Sin movimientos recientes</div>';
+  } else {
+    data.historial.forEach(item => {
+      const isPositive = item.puntos > 0;
+      let colorClass = isPositive ? 'text-mapis-dark bg-mapis-light' : 'text-red-600 bg-red-50';
+      let icon = isPositive ? 'ph-check-circle' : 'ph-warning-circle';
+      if (item.descripcion.includes("CANJE")) { colorClass = 'text-blue-600 bg-blue-50'; icon = 'ph-shopping-cart'; }
+      
+      const sign = isPositive ? '+' : '';
+      const notaHtml = item.nota ? `<p class="text-[10px] text-slate-600 italic mt-0.5 bg-slate-50 px-2 py-1 rounded inline-block border border-slate-100">"${item.nota}"</p>` : '';
+
+      listContainer.innerHTML += `
+      <div class="flex items-center justify-between p-3 bg-white rounded-2xl border border-slate-100 shadow-sm">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 ${colorClass} rounded-full flex items-center justify-center flex-shrink-0"><i class="ph-fill ${icon} text-sm"></i></div>
+          <div>
+            <p class="font-bold text-xs text-slate-800 uppercase">${item.descripcion}</p>
+            <p class="text-[10px] text-slate-400">${item.fecha} • ${item.responsable}</p>
+            ${notaHtml}
+          </div>
+        </div>
+        <span class="font-bold text-sm ${isPositive ? 'text-mapis-dark' : 'text-red-600'}">${sign}${item.puntos}</span>
+      </div>`;
+    });
+  }
+
+  cargarMarketplace();
+  cargarNotificaciones();
+}
+
+function cargarMarketplace() {
+    google.script.run
+        .withSuccessHandler(function(res) {
+            const container = document.getElementById('marketplace-list');
+            container.innerHTML = '';
+            
+            if (!res || !res.success || !res.premios || res.premios.length === 0) {
+                container.innerHTML = '<div class="p-4 bg-white rounded-2xl border border-slate-100 text-center text-slate-400 text-sm">No hay premios disponibles</div>';
                 return;
             }
-
-            data.historial.forEach(item => {
-                const isPositive = item.puntos > 0;
-                const colorClass = isPositive ? 'text-emerald-600 bg-emerald-50' : 'text-red-600 bg-red-50';
-                const icon = isPositive ? 'ph-check-circle' : 'ph-warning-circle';
-                const sign = isPositive ? '+' : '';
-                listContainer.innerHTML += `
-                    <div class="flex items-center justify-between p-3 bg-white rounded-2xl border border-slate-100 shadow-sm">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 ${colorClass} rounded-full flex items-center justify-center flex-shrink-0"><i class="ph-fill ${icon} text-sm"></i></div>
-                            <div><p class="font-bold text-xs text-slate-800 uppercase">${item.descripcion}</p><p class="text-[10px] text-slate-400">${item.fecha}</p></div>
+            
+            res.premios.forEach(function(premio) {
+                const div = document.createElement('div');
+                div.className = 'bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex justify-between items-center';
+                
+                let iconClass = 'ph-gift';
+                const nombreLower = premio.nombre.toLowerCase();
+                if (nombreLower.includes('uniforme')) iconClass = 'ph-t-shirt';
+                if (nombreLower.includes('receso')) iconClass = 'ph-coffee';
+                if (nombreLower.includes('entrega')) iconClass = 'ph-clock';
+                if (nombreLower.includes('tienda')) iconClass = 'ph-shopping-bag';
+                if (nombreLower.includes('confort')) iconClass = 'ph-armchair';
+                if (nombreLower.includes('pase')) iconClass = 'ph-ticket';
+                
+                div.innerHTML = `
+                    <div class="flex items-start gap-3">
+                        <div class="w-10 h-10 bg-amber-100 text-amber-700 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="ph-fill ${iconClass} text-xl"></i>
                         </div>
-                        <span class="font-bold text-sm ${isPositive ? 'text-emerald-600' : 'text-red-600'}">${sign}${item.puntos}</span>
-                    </div>`;
+                        <div>
+                            <p class="font-bold text-sm text-slate-800">${premio.nombre}</p>
+                            <p class="text-[10px] text-slate-500 leading-tight mt-1">${premio.descripcion}</p>
+                        </div>
+                    </div>
+                    <div class="text-right flex-shrink-0">
+                        <p class="text-mapis-gold font-black text-sm mb-1">${premio.costo} pts</p>
+                        <button onclick="solicitarCanje('${premio.nombre}', ${premio.costo}, '${premio.id}')" 
+                            class="bg-mapis-dark hover:bg-mapis-mid text-white text-xs font-bold py-2 px-3 rounded-lg transition">
+                            Solicitar
+                        </button>
+                    </div>
+                `;
+                container.appendChild(div);
             });
-        }
+        })
+        .withFailureHandler(function(err) {
+            document.getElementById('marketplace-list').innerHTML = '<div class="p-4 bg-white rounded-2xl border border-slate-100 text-center text-red-400 text-sm">Error al cargar premios</div>';
+        })
+        .obtenerConfiguracion();
+}
 
-        function logout() {
-            location.reload();
+async function solicitarCanje(nombre, costo, idPremio) {
+    const ok = await mapisConfirm(
+        'Solicitar canje', 
+        `¿Deseas solicitar el canje de "${nombre}" por ${costo} puntos? Tu profesor guía deberá aprobarlo.`, 
+        { icon: 'ph-paper-plane-tilt', acceptText: 'Enviar solicitud' }
+    );
+    if (!ok) return;
+    
+    mapisLoading(true, 'Enviando solicitud...');
+    
+    google.script.run.withSuccessHandler(async function(res) {
+        mapisLoading(false);
+        if (res.success) {
+            await mapisAlert('¡Solicitud enviada!', `Tu solicitud de "${nombre}" fue enviada. Tu profesor guía la aprobará.`, { icon: 'ph-check-circle', type: 'success' });
+        } else {
+            await mapisAlert('No se pudo enviar', res.error, { icon: 'ph-warning-circle', type: 'error' });
         }
-    </script>
+    }).withFailureHandler(async function(err) {
+        mapisLoading(false);
+        await mapisAlert('Error', String(err), { icon: 'ph-wifi-slash', type: 'error' });
+    }).solicitarCanje({
+        idEstudiante: currentHash,
+        idPremio: idPremio,
+        nombrePremio: nombre,
+        costo: costo
+    });
+}
+
+function abrirBuzonEstudiante() {
+    document.getElementById('buzon-mensaje').value = '';
+    document.getElementById('buzon-tipo').value = 'Sugerencia';
+    document.getElementById('buzon-modal').classList.remove('hidden');
+}
+
+function cerrarBuzonEstudiante() {
+    document.getElementById('buzon-modal').classList.add('hidden');
+}
+
+function enviarSugerenciaEstudiante() {
+    const tipo = document.getElementById('buzon-tipo').value;
+    const mensaje = document.getElementById('buzon-mensaje').value.trim();
+    
+    if (!mensaje) {
+        return mapisAlert('Falta el mensaje', 'Escribe tu sugerencia antes de enviar.');
+    }
+    
+    mapisLoading(true, 'Enviando...');
+    google.script.run.withSuccessHandler(function(res) {
+        mapisLoading(false);
+        if (res.success) {
+            cerrarBuzonEstudiante();
+            mapisAlert('¡Gracias!', 'Tu sugerencia fue enviada al equipo directivo.', { icon: 'ph-check-circle', type: 'success' });
+        } else {
+            mapisAlert('Error', res.error, { icon: 'ph-x-circle', type: 'error' });
+        }
+    }).withFailureHandler(function(err) {
+        mapisLoading(false);
+        mapisAlert('Error', String(err), { icon: 'ph-wifi-slash', type: 'error' });
+    }).enviarSugerencia({
+        autor: currentStudentData ? currentStudentData.nombre : 'Estudiante',
+        rolAutor: 'estudiante',
+        tipo: tipo,
+        mensaje: mensaje
+    });
+}
+
+function cargarNotificaciones() {
+  google.script.run.withSuccessHandler(function(res) {
+    if (!res.success) return;
+    
+    const badge = document.getElementById('notif-badge');
+    if (res.noLeidas > 0) {
+      badge.innerText = res.noLeidas > 99 ? '99+' : res.noLeidas;
+      badge.classList.remove('hidden');
+    } else {
+      badge.classList.add('hidden');
+    }
+  }).obtenerNotificacionesEstudiante(currentHash);
+}
+
+function abrirNotificaciones() {
+  document.getElementById('notif-modal').classList.remove('hidden');
+  const contenedor = document.getElementById('notif-contenedor');
+  contenedor.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">Cargando...</p>';
+  
+  google.script.run.withSuccessHandler(function(res) {
+    contenedor.innerHTML = '';
+    
+    if (!res.success || !res.notificaciones || res.notificaciones.length === 0) {
+      contenedor.innerHTML = '<p class="text-center text-slate-400 text-sm py-6"><i class="ph-fill ph-bell-slash text-3xl mb-2 block"></i>No tienes notificaciones</p>';
+      return;
+    }
+    
+    res.notificaciones.forEach(n => {
+      const div = document.createElement('div');
+      const bgColor = n.leida ? 'bg-white' : 'bg-mapis-light border-mapis-dark/20';
+      const borderColor = n.leida ? 'border-slate-200' : 'border-mapis-dark/30';
+      
+      div.className = `p-3 border-2 ${borderColor} ${bgColor} rounded-xl shadow-sm cursor-pointer hover:shadow-md transition`;
+      div.onclick = function() { marcarLeida(n.fila, div); };
+      
+      let icono = 'ph-bell';
+      let colorIcono = 'text-mapis-dark';
+      if (n.titulo.includes('✅')) { icono = 'ph-check-circle'; colorIcono = 'text-emerald-600'; }
+      if (n.titulo.includes('❌')) { icono = 'ph-x-circle'; colorIcono = 'text-red-600'; }
+      if (n.titulo.includes('⚠️')) { icono = 'ph-warning'; colorIcono = 'text-amber-600'; }
+      if (n.titulo.includes('📋')) { icono = 'ph-clipboard-text'; colorIcono = 'text-mapis-dark'; }
+      
+      div.innerHTML = `
+        <div class="flex items-start gap-2">
+          <i class="ph-fill ${icono} ${colorIcono} text-lg flex-shrink-0 mt-0.5"></i>
+          <div class="flex-1">
+            <div class="flex justify-between items-start">
+              <p class="font-bold text-xs text-slate-800">${n.titulo.replace(/[✅❌⚠️📋]/g, '').trim()}</p>
+              <span class="text-[9px] text-slate-400 flex-shrink-0 ml-2">${n.fecha}</span>
+            </div>
+            <p class="text-xs text-slate-600 leading-relaxed mt-1">${n.mensaje}</p>
+            ${!n.leida ? '<span class="inline-block mt-2 text-[9px] bg-red-500 text-white px-2 py-0.5 rounded-full font-bold">NUEVA</span>' : ''}
+          </div>
+        </div>
+      `;
+      contenedor.appendChild(div);
+    });
+    
+    setTimeout(cargarNotificaciones, 500);
+  }).withFailureHandler(function(err) {
+    contenedor.innerHTML = '<p class="text-xs text-red-500 text-center py-4">Error: ' + err + '</p>';
+  }).obtenerNotificacionesEstudiante(currentHash);
+}
+
+function cerrarNotificaciones() {
+  document.getElementById('notif-modal').classList.add('hidden');
+  cargarNotificaciones();
+}
+
+function marcarLeida(fila, elemento) {
+  if (elemento.classList.contains('bg-white')) return;
+  
+  google.script.run.withSuccessHandler(function(res) {
+    if (res.success) {
+      elemento.classList.remove('bg-mapis-light', 'border-mapis-dark/30');
+      elemento.classList.add('bg-white', 'border-slate-200');
+      
+      const badge = elemento.querySelector('span.bg-red-500');
+      if (badge) badge.remove();
+      
+      cargarNotificaciones();
+    }
+  }).marcarNotificacionLeida(fila);
+}
+
+function logout() {
+  localStorage.removeItem('mapis_student_id');
+  currentHash = null;
+  document.getElementById('student-login-id').value = '';
+  document.getElementById('history-list').innerHTML = '<div class="p-4 bg-white rounded-2xl border border-slate-100 text-center text-slate-400 text-sm">Cargando historial...</div>';
+  
+  document.getElementById('dashboard-screen').classList.add('hidden');
+  document.getElementById('dashboard-screen').classList.remove('flex');
+  document.getElementById('login-screen').classList.remove('hidden');
+  
+  setTimeout(() => { document.getElementById('student-login-id').focus(); }, 300);
+}
+</script>
 </body>
 </html>
