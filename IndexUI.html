@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base target="_top">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/cheoreyes/Mapis_image/main/insignia.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://raw.githubusercontent.com/cheoreyes/Mapis_image/main/insignia.png">
+    <link rel="manifest" href='data:application/manifest+json,{"name":"MAPIS","short_name":"MAPIS","start_url":".","display":"standalone","background_color":"#2a3376","theme_color":"#2a3376","icons":[{"src":"https://raw.githubusercontent.com/cheoreyes/Mapis_image/main/insignia.png","sizes":"192x192","type":"image/png"},{"src":"https://raw.githubusercontent.com/cheoreyes/Mapis_image/main/insignia.png","sizes":"512x512","type":"image/png"}]}'>
+    <meta name="theme-color" content="#2a3376">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="MAPIS">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        mapis: {
+                            dark: '#2a3376',
+                            mid: '#1f2860',
+                            light: '#e8ebf7',
+                            gold: '#fcb713',
+                            goldDark: '#d99e0a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', system-ui, sans-serif; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-gradient-to-br from-mapis-dark via-mapis-mid to-mapis-dark">
+
+    <div class="flex-1 flex flex-col items-center justify-center p-6">
+        
+        <div class="text-center mb-10">
+            <div class="w-24 h-24 bg-white rounded-3xl mx-auto flex items-center justify-center shadow-2xl mb-5 border-4 border-mapis-gold/40 overflow-hidden">
+                <img src="https://raw.githubusercontent.com/cheoreyes/Mapis_image/main/insignia.png" alt="MAPIS" class="w-full h-full object-cover">
+            </div>
+            <h1 class="text-3xl font-black text-white tracking-tight">MAPIS</h1>
+            <p class="text-white/70 text-xs mt-1 uppercase tracking-widest">U.E. Mariano Picón Salas</p>
+            <p class="text-mapis-gold text-xs mt-3 font-bold">#YoSoyMapis</p>
+        </div>
+
+        <div class="w-full max-w-sm space-y-3">
+            
+            <button onclick="irA('docente')" 
+                class="w-full bg-white/10 hover:bg-white/20 backdrop-blur border border-white/20 text-white p-5 rounded-2xl flex items-center gap-4 shadow-xl active:scale-95 transition text-left">
+                <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-2xl flex-shrink-0">
+                    <i class="ph-fill ph-chalkboard-teacher"></i>
+                </div>
+                <div class="flex-1">
+                    <p class="font-black text-base">Soy Docente</p>
+                    <p class="text-[11px] text-white/60 mt-0.5">Registrar incidencias y aprobar canjes</p>
+                </div>
+                <i class="ph-bold ph-caret-right text-white/40"></i>
+            </button>
+
+            <button onclick="irA('estudiante')" 
+                class="w-full bg-white/10 hover:bg-white/20 backdrop-blur border border-white/20 text-white p-5 rounded-2xl flex items-center gap-4 shadow-xl active:scale-95 transition text-left">
+                <div class="w-12 h-12 bg-mapis-gold rounded-xl flex items-center justify-center text-2xl flex-shrink-0 text-mapis-dark">
+                    <i class="ph-fill ph-student"></i>
+                </div>
+                <div class="flex-1">
+                    <p class="font-black text-base">Soy Estudiante</p>
+                    <p class="text-[11px] text-white/60 mt-0.5">Ver mis créditos y solicitar premios</p>
+                </div>
+                <i class="ph-bold ph-caret-right text-white/40"></i>
+            </button>
+
+            <button onclick="irA('admin')" 
+                class="w-full bg-white/10 hover:bg-white/20 backdrop-blur border border-white/20 text-white p-5 rounded-2xl flex items-center gap-4 shadow-xl active:scale-95 transition text-left">
+                <div class="w-12 h-12 bg-slate-600 rounded-xl flex items-center justify-center text-2xl flex-shrink-0">
+                    <i class="ph-fill ph-gear"></i>
+                </div>
+                <div class="flex-1">
+                    <p class="font-black text-base">Administración</p>
+                    <p class="text-[11px] text-white/60 mt-0.5">Gestionar usuarios, guías y carnets</p>
+                </div>
+                <i class="ph-bold ph-caret-right text-white/40"></i>
+            </button>
+        </div>
+
+        <p class="text-white/40 text-[10px] text-center mt-12">
+            Los Robles, Nueva Esparta · Venezuela<br>
+            Fundada en 2008
+        </p>
+    </div>
+
+    <script>
+        function irA(pagina) {
+            window.top.location.href = '?page=' + pagina;
+        }
+    </script>
+</body>
+</html>
