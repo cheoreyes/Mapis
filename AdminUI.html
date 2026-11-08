@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base target="_top">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/cheoreyes/Mapis_image/main/insignia.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://raw.githubusercontent.com/cheoreyes/Mapis_image/main/insignia.png">
+    <link rel="manifest" href='data:application/manifest+json,{"name":"MAPIS","short_name":"MAPIS","start_url":".","display":"standalone","background_color":"#2a3376","theme_color":"#2a3376","icons":[{"src":"https://raw.githubusercontent.com/cheoreyes/Mapis_image/main/insignia.png","sizes":"192x192","type":"image/png"},{"src":"https://raw.githubusercontent.com/cheoreyes/Mapis_image/main/insignia.png","sizes":"512x512","type":"image/png"}]}'>
+    <meta name="theme-color" content="#2a3376">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="MAPIS">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        mapis: {
+                            dark: '#2a3376',
+                            mid: '#1f2860',
+                            light: '#e8ebf7',
+                            gold: '#fcb713',
+                            goldDark: '#d99e0a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
+        .tab-btn { padding: 0.7rem 0.4rem; font-size: 0.65rem; font-weight: 500; color: #64748b; border-bottom: 2px solid transparent; transition: all 0.2s; }
+        .tab-btn.active { color: #2a3376; border-bottom-color: #2a3376; font-weight: 700; }
+        .hidden-section { display: none; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+
+    <div id="login-admin" class="w-full max-w-md bg-white p-8 rounded-3xl shadow-xl border-t-4 border-mapis-dark">
+        <div class="text-center mb-6">
+            <div class="w-16 h-16 bg-mapis-dark text-white rounded-2xl mx-auto flex items-center justify-center text-2xl mb-3 shadow-lg"><i class="ph-fill ph-gear"></i></div>
+            <h1 class="text-xl font-black text-mapis-dark">Control de Estudio</h1>
+            <p class="text-xs text-slate-500 mt-1">U.E. Mariano Picón Salas · MAPIS</p>
+        </div>
+        <input type="password" id="admin-pass" placeholder="Contraseña de administrador" 
+            class="w-full p-3 border border-slate-300 rounded-xl mb-4 focus:ring-2 focus:ring-mapis-dark/30 focus:border-mapis-dark outline-none transition">
+        <button onclick="entrarAdmin()" class="w-full bg-mapis-dark text-white py-3 rounded-xl font-bold hover:bg-mapis-mid transition shadow-lg active:scale-95">
+            Ingresar
+        </button>
+        <p class="text-[10px] text-slate-400 text-center mt-4">#SomosMapis · Los Robles, Nueva Esparta</p>
+    </div>
+
+    <div id="panel-admin" class="hidden w-full max-w-md bg-white rounded-2xl shadow-lg overflow-hidden min-h-[500px] flex flex-col">
+        
+        <div class="bg-gradient-to-r from-mapis-dark to-mapis-mid text-white p-4 flex justify-between items-center flex-shrink-0">
+            <div class="flex items-center gap-2">
+                <img src="https://raw.githubusercontent.com/cheoreyes/Mapis_image/main/insignia.png" alt="MAPIS" class="w-8 h-8 rounded-lg object-cover border border-white/20">
+                <div class="flex flex-col leading-tight">
+                    <span class="font-bold text-sm">Gestión de Usuarios</span>
+                    <span class="text-[9px] opacity-75">Panel Administrativo</span>
+                </div>
+            </div>
+            <button onclick="location.reload()" class="text-xs bg-white/15 hover:bg-white/25 px-2 py-1 rounded transition">Salir</button>
+        </div>
+
+        <div class="flex border-b border-slate-200 bg-white flex-shrink-0 overflow-x-auto">
+            <button onclick="cambiarTab('crear')" id="tab-crear" class="tab-btn active flex-1 whitespace-nowrap">➕ Crear</button>
+            <button onclick="cargarLista('estudiante')" id="tab-edit-est" class="tab-btn flex-1 whitespace-nowrap">🎓 Est.</button>
+            <button onclick="cargarLista('docente')" id="tab-edit-doc" class="tab-btn flex-1 whitespace-nowrap">👨‍🏫 Doc.</button>
+            <button onclick="cargarGuias()" id="tab-guias" class="tab-btn flex-1 whitespace-nowrap">🎯 Guías</button>
+            <button onclick="cargarRoles()" id="tab-roles" class="tab-btn flex-1 whitespace-nowrap">👔 Roles</button>
+            <button onclick="cargarDashboard()" id="tab-dashboard" class="tab-btn flex-1 whitespace-nowrap">📊 Dash</button>
+            <button onclick="cargarSugerencias()" id="tab-sugerencias" class="tab-btn flex-1 whitespace-nowrap">💬 Sug.</button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-6 relative">
+            
+            <div id="view-crear" class="space-y-6">
+                <div class="flex gap-2 mb-4">
+                    <button onclick="toggleFormCrear('est')" id="btn-crear-est" class="flex-1 py-2 text-xs font-bold rounded-lg bg-mapis-dark text-white transition">Estudiante</button>
+                    <button onclick="toggleFormCrear('doc')" id="btn-crear-doc" class="flex-1 py-2 text-xs font-bold rounded-lg bg-slate-200 text-slate-600 transition">Docente</button>
+                </div>
+
+                <div id="form-crear-est" class="space-y-4">
+                    <input type="text" id="new-est-nombre" placeholder="Nombre Completo" class="w-full p-3 border border-slate-300 rounded-xl outline-none focus:border-mapis-dark focus:ring-2 focus:ring-mapis-dark/20 transition">
+                    <input type="text" id="new-est-grado" placeholder="Grado / Sección (Ej: 1er Año A)" class="w-full p-3 border border-slate-300 rounded-xl outline-none focus:border-mapis-dark focus:ring-2 focus:ring-mapis-dark/20 transition">
+                    
+                    <div class="grid grid-cols-3 gap-2">
+                        <input type="text" id="new-est-cedula" maxlength="4" placeholder="Últ. Cédula (1234)" class="w-full p-3 border border-slate-300 rounded-xl outline-none focus:border-mapis-dark focus:ring-2 focus:ring-mapis-dark/20 transition text-center">
+                        <input type="text" id="new-est-siglas" maxlength="4" placeholder="Siglas (ABCD)" class="w-full p-3 border border-slate-300 rounded-xl outline-none focus:border-mapis-dark focus:ring-2 focus:ring-mapis-dark/20 transition text-center uppercase">
+                        <input type="number" id="new-est-anio" placeholder="Año (1)" class="w-full p-3 border border-slate-300 rounded-xl outline-none focus:border-mapis-dark focus:ring-2 focus:ring-mapis-dark/20 transition text-center">
+                    </div>
+                    <p class="text-[10px] text-slate-400 text-center -mt-2">El código será: Últ. Cédula + Siglas + Año (Ej: 1234ABCD1)</p>
+
+                    <input type="email" id="new-est-email" placeholder="Correo institucional (opcional)" class="w-full p-3 border border-slate-300 rounded-xl outline-none focus:border-mapis-dark focus:ring-2 focus:ring-mapis-dark/20 transition">
+
+                    <div class="relative">
+                        <input type="number" id="new-est-saldo" placeholder="Saldo Inicial (Ej: 500)" class="w-full p-3 border border-slate-300 rounded-xl outline-none focus:border-mapis-dark focus:ring-2 focus:ring-mapis-dark/20 transition">
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                            <span class="text-xs text-slate-400 font-bold">PTS</span>
+                        </div>
+                    </div>
+
+                    <button onclick="guardarEstudiante(event)" class="w-full bg-mapis-dark text-white py-3 rounded-xl font-bold shadow-lg hover:bg-mapis-mid transition active:scale-95">Crear Estudiante</button>
+                    <div id="qr-result" class="hidden p-4 bg-mapis-light border border-mapis-dark/20 rounded-xl text-center">
+                        <p class="text-mapis-dark font-bold text-xs mb-1">CÓDIGO GENERADO:</p>
+                        <p id="hash-generado" class="text-xl font-black text-slate-800 tracking-widest select-all">---</p>
+                        <p class="text-[10px] text-slate-500 mt-2">Este es el código de acceso del estudiante.</p>
+                    </div>
+                </div>
+
+                <div id="form-crear-doc" class="space-y-4 hidden">
+                    <input type="text" id="new-doc-nombre" placeholder="Nombre Profesor" class="w-full p-3 border border-slate-300 rounded-xl outline-none focus:border-mapis-dark focus:ring-2 focus:ring-mapis-dark/20 transition">
+                    <input type="number" id="new-doc-pin" maxlength="4" placeholder="PIN (4 dígitos)" class="w-full p-3 border border-slate-300 rounded-xl outline-none focus:border-mapis-dark focus:ring-2 focus:ring-mapis-dark/20 transition text-center tracking-widest">
+                    <button onclick="guardarDocente()" class="w-full bg-mapis-dark text-white py-3 rounded-xl font-bold shadow-lg hover:bg-mapis-mid transition active:scale-95">Crear Docente</button>
+                </div>
+            </div>
+
+            <div id="view-lista" class="hidden-section space-y-3">
+                <h3 id="lista-titulo" class="font-bold text-mapis-dark mb-2">Usuarios</h3>
+                <div id="lista-contenedor" class="space-y-2"></div>
+            </div>
+
+            <div id="view-editar" class="hidden-section space-y-4">
+                <button onclick="volverLista()" class="text-sm text-mapis-dark font-bold flex items-center gap-1 mb-2"><i class="ph-bold ph-arrow-left"></i> Volver a lista</button>
+                
+                <label class="block text-xs font-bold text-slate-500 uppercase">Nombre</label>
+                <input type="text" id="edit-nombre" class="w-full p-3 border border-slate-300 rounded-xl outline-none focus:border-mapis-dark transition">
+                
+                <label id="lbl-valor2" class="block text-xs font-bold text-slate-500 uppercase mt-2">Valor 2</label>
+                <input type="text" id="edit-valor2" class="w-full p-3 border border-slate-300 rounded-xl outline-none focus:border-mapis-dark transition">
+
+                <label id="lbl-valor3" class="block text-xs font-bold text-slate-500 uppercase mt-2 hidden">Correo institucional</label>
+                <input type="email" id="edit-valor3" placeholder="estudiante@colegio.edu" class="w-full p-3 border border-slate-300 rounded-xl outline-none focus:border-mapis-dark transition hidden">
+
+                <button onclick="guardarEdicion()" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold mt-4 shadow-lg hover:bg-emerald-700 transition active:scale-95">Guardar Cambios</button>
+            </div>
+
+            <div id="view-guias" class="hidden-section space-y-3">
+                <h3 class="font-bold text-mapis-dark mb-1">Profesores Guías</h3>
+                <p class="text-xs text-slate-500 mb-4">El profesor guía aprueba las solicitudes de canje de los grados que tenga asignados. Un docente puede ser guía de varios grados.</p>
+                <div id="guias-contenedor" class="space-y-2"></div>
+                
+                <div class="mt-6 p-4 bg-mapis-light rounded-xl border border-mapis-dark/10">
+                    <p class="text-xs font-bold text-mapis-dark mb-3">Asignar / Añadir Guía</p>
+                    <select id="guia-docente" class="w-full p-2 border border-slate-300 rounded-lg mb-2 text-sm">
+                        <option value="">-- Selecciona docente --</option>
+                    </select>
+                    <input type="text" id="guia-grado" placeholder="Grado exacto (Ej: 1er Año A)" 
+                        class="w-full p-2 border border-slate-300 rounded-lg mb-3 text-sm focus:border-mapis-dark outline-none">
+                    <button onclick="asignarGuia()" class="w-full bg-mapis-dark text-white py-2 rounded-lg font-bold text-sm hover:bg-mapis-mid">
+                        Asignar Grado
+                    </button>
+                </div>
+            </div>
+
+            <div id="view-roles" class="hidden-section space-y-3">
+                <h3 class="font-bold text-mapis-dark mb-1">Roles Especiales</h3>
+                <p class="text-xs text-slate-500 mb-4">Asigna el rol de <strong>Coordinador</strong> (ve todo + gestiona falta de 3er nivel) o <strong>Director</strong> (dashboard completo).</p>
+                <div id="roles-contenedor" class="space-y-2"></div>
+                
+                <div class="mt-6 p-4 bg-mapis-light rounded-xl border border-mapis-dark/10">
+                    <p class="text-xs font-bold text-mapis-dark mb-3">Asignar Rol Especial</p>
+                    <select id="rol-docente" class="w-full p-2 border border-slate-300 rounded-lg mb-2 text-sm">
+                        <option value="">-- Selecciona docente --</option>
+                    </select>
+                    <select id="rol-tipo" class="w-full p-2 border border-slate-300 rounded-lg mb-3 text-sm">
+                        <option value="">-- Selecciona rol --</option>
+                        <option value="coordinador">Coordinador</option>
+                        <option value="director">Director</option>
+                    </select>
+                    <button onclick="asignarRol()" class="w-full bg-mapis-dark text-white py-2 rounded-lg font-bold text-sm hover:bg-mapis-mid">
+                        Asignar Rol
+                    </button>
+                </div>
+            </div>
+
+            <div id="view-dashboard" class="hidden-section space-y-4">
+                <h3 class="font-bold text-mapis-dark mb-1">Dashboard Institucional</h3>
+                <p class="text-xs text-slate-500 mb-3">Métricas del mes: incidencias frecuentes, tendencias y estudiantes con más reportes.</p>
+                
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <input type="month" id="dash-mes" class="w-full p-2 border border-slate-300 rounded-lg text-sm">
+                    <button onclick="actualizarDashboard()" class="bg-mapis-dark text-white py-2 rounded-lg font-bold text-sm hover:bg-mapis-mid">Actualizar</button>
+                </div>
+                
+                <div id="dashboard-contenido" class="space-y-4">
+                    <p class="text-xs text-slate-400 text-center py-4">Selecciona un mes y presiona Actualizar</p>
+                </div>
+            </div>
+
+            <div id="view-sugerencias" class="hidden-section space-y-3">
+                <h3 class="font-bold text-mapis-dark mb-1">Buzón de Sugerencias</h3>
+                <p class="text-xs text-slate-500 mb-4">Propuestas y comentarios enviados por estudiantes y docentes.</p>
+                <div id="sugerencias-contenedor" class="space-y-2">
+                    <p class="text-xs text-slate-400 text-center py-4">Cargando...</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="mapis-confirm" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4" style="background: rgba(15,23,42,0.7); backdrop-filter: blur(6px);">
+        <div id="mapis-confirm-card" class="bg-white rounded-3xl shadow-2xl w-full max-w-sm transform scale-95 opacity-0 transition-all duration-300 overflow-hidden">
+            <div id="mapis-confirm-bar" class="h-1.5 bg-gradient-to-r from-mapis-dark to-mapis-gold"></div>
+            <div class="p-6 text-center">
+                <div id="mapis-confirm-icon-wrap" class="w-16 h-16 mx-auto mb-4 rounded-full bg-mapis-light flex items-center justify-center">
+                    <i id="mapis-confirm-icon" class="ph-fill ph-question text-mapis-dark text-3xl"></i>
+                </div>
+                <h3 id="mapis-confirm-title" class="text-lg font-black text-slate-800 mb-2">Confirmar acción</h3>
+                <p id="mapis-confirm-message" class="text-sm text-slate-500 leading-relaxed mb-6">¿Estás seguro?</p>
+                <div class="flex gap-3">
+                    <button onclick="mapisConfirmCancel()" id="mapis-confirm-cancel-btn"
+                        class="flex-1 py-3 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition active:scale-95">
+                        Cancelar
+                    </button>
+                    <button onclick="mapisConfirmAccept()" id="mapis-confirm-btn" 
+                        class="flex-1 py-3 px-4 bg-mapis-dark hover:bg-mapis-mid text-white font-bold rounded-xl shadow-lg transition active:scale-95">
+                        Aceptar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="mapis-alert" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4" style="background: rgba(15,23,42,0.7); backdrop-filter: blur(6px);">
+        <div id="mapis-alert-card" class="bg-white rounded-3xl shadow-2xl w-full max-w-sm transform scale-95 opacity-0 transition-all duration-300 overflow-hidden">
+            <div id="mapis-alert-bar" class="h-1.5 bg-mapis-dark"></div>
+            <div class="p-6 text-center">
+                <div id="mapis-alert-icon-wrap" class="w-16 h-16 mx-auto mb-4 rounded-full bg-mapis-light flex items-center justify-center">
+                    <i id="mapis-alert-icon" class="ph-fill ph-info text-mapis-dark text-3xl"></i>
+                </div>
+                <h3 id="mapis-alert-title" class="text-lg font-black text-slate-800 mb-2">Información</h3>
+                <p id="mapis-alert-message" class="text-sm text-slate-500 leading-relaxed mb-6">Mensaje del sistema</p>
+                <button onclick="mapisAlertClose()" 
+                    class="w-full py-3 px-4 bg-mapis-dark hover:bg-mapis-mid text-white font-bold rounded-xl shadow-lg transition active:scale-95">
+                    Entendido
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="mapis-loading" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4" style="background: rgba(15,23,42,0.75); backdrop-filter: blur(6px);">
+        <div class="bg-white rounded-3xl shadow-2xl p-8 text-center max-w-xs mx-4">
+            <div class="relative w-20 h-20 mx-auto mb-4">
+                <div class="absolute inset-0 rounded-full border-4 border-mapis-light"></div>
+                <div class="absolute inset-0 rounded-full border-4 border-transparent border-t-mapis-dark animate-spin"></div>
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <span class="text-mapis-dark text-2xl font-black">M</span>
+                </div>
+            </div>
+            <h3 id="mapis-loading-title" class="font-black text-base text-slate-800">Cargando...</h3>
+            <p id="mapis-loading-msg" class="text-xs text-slate-500 mt-1">Procesando solicitud</p>
+        </div>
+    </div>
+
+    <script>
+        let currentEditType = '';
+        let currentEditId = '';
+        let _mapisConfirmCallback = null;
+
+        function mapisConfirm(title, message, options = {}) {
+            return new Promise((resolve) => {
+                const opts = {
+                    icon: options.icon || 'ph-question',
+                    acceptText: options.acceptText || 'Aceptar',
+                    cancelText: options.cancelText || 'Cancelar',
+                    danger: options.danger || false
+                };
+                
+                const modal = document.getElementById('mapis-confirm');
+                const card = document.getElementById('mapis-confirm-card');
+                const bar = document.getElementById('mapis-confirm-bar');
+                const iconWrap = document.getElementById('mapis-confirm-icon-wrap');
+                const icon = document.getElementById('mapis-confirm-icon');
+                const acceptBtn = document.getElementById('mapis-confirm-btn');
+                const cancelBtn = document.getElementById('mapis-confirm-cancel-btn');
+                
+                document.getElementById('mapis-confirm-title').innerText = title;
+                document.getElementById('mapis-confirm-message').innerText = message;
+                acceptBtn.innerText = opts.acceptText;
+                cancelBtn.innerText = opts.cancelText;
+                icon.className = `ph-fill ${opts.icon} text-3xl`;
+                
+                if (opts.danger) {
+                    bar.className = 'h-1.5 bg-gradient-to-r from-red-500 to-rose-600';
+                    iconWrap.className = 'w-16 h-16 mx-auto mb-4 rounded-full bg-red-50 flex items-center justify-center';
+                    icon.classList.add('text-red-600');
+                    icon.classList.remove('text-mapis-dark');
+                    acceptBtn.className = 'flex-1 py-3 px-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-lg transition active:scale-95';
+                } else {
+                    bar.className = 'h-1.5 bg-gradient-to-r from-mapis-dark to-mapis-gold';
+                    iconWrap.className = 'w-16 h-16 mx-auto mb-4 rounded-full bg-mapis-light flex items-center justify-center';
+                    icon.classList.add('text-mapis-dark');
+                    icon.classList.remove('text-red-600');
+                    acceptBtn.className = 'flex-1 py-3 px-4 bg-mapis-dark hover:bg-mapis-mid text-white font-bold rounded-xl shadow-lg transition active:scale-95';
+                }
+                
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    card.classList.remove('scale-95', 'opacity-0');
+                    card.classList.add('scale-100', 'opacity-100');
+                }, 10);
+                
+                _mapisConfirmCallback = (accepted) => {
+                    card.classList.add('scale-95', 'opacity-0');
+                    setTimeout(() => {
+                        modal.classList.add('hidden');
+                        resolve(accepted);
+                    }, 250);
+                };
+            });
+        }
+
+        function mapisConfirmAccept() {
+            if (_mapisConfirmCallback) _mapisConfirmCallback(true);
+        }
+        function mapisConfirmCancel() {
+            if (_mapisConfirmCallback) _mapisConfirmCallback(false);
+        }
+
+        function mapisAlert(title, message, options = {}) {
+            return new Promise((resolve) => {
+                const opts = {
+                    icon: options.icon || 'ph-info',
+                    type: options.type || 'info'
+                };
+                
+                const modal = document.getElementById('mapis-alert');
+                const card = document.getElementById('mapis-alert-card');
+                const bar = document.getElementById('mapis-alert-bar');
+                const iconWrap = document.getElementById('mapis-alert-icon-wrap');
+                const icon = document.getElementById('mapis-alert-icon');
+                
+                document.getElementById('mapis-alert-title').innerText = title;
+                document.getElementById('mapis-alert-message').innerText = message;
+                icon.className = `ph-fill ${opts.icon} text-3xl`;
+                
+                const tipos = {
+                    info:    { bar: 'h-1.5 bg-mapis-dark',                wrap: 'bg-mapis-light', iconColor: 'text-mapis-dark' },
+                    success: { bar: 'h-1.5 bg-gradient-to-r from-emerald-500 to-teal-600', wrap: 'bg-emerald-50',  iconColor: 'text-emerald-600' },
+                    warning: { bar: 'h-1.5 bg-gradient-to-r from-amber-400 to-mapis-gold',  wrap: 'bg-amber-50',    iconColor: 'text-amber-600' },
+                    error:   { bar: 'h-1.5 bg-gradient-to-r from-red-500 to-rose-600',      wrap: 'bg-red-50',      iconColor: 'text-red-600' }
+                };
+                const t = tipos[opts.type] || tipos.info;
+                
+                bar.className = t.bar;
+                iconWrap.className = `w-16 h-16 mx-auto mb-4 rounded-full ${t.wrap} flex items-center justify-center`;
+                icon.classList.remove('text-mapis-dark', 'text-emerald-600', 'text-amber-600', 'text-red-600');
+                icon.classList.add(t.iconColor);
+                
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    card.classList.remove('scale-95', 'opacity-0');
+                    card.classList.add('scale-100', 'opacity-100');
+                }, 10);
+                
+                window._mapisAlertResolve = () => {
+                    card.classList.add('scale-95', 'opacity-0');
+                    setTimeout(() => {
+                        modal.classList.add('hidden');
+                        resolve(true);
+                    }, 250);
+                };
+            });
+        }
+
+        function mapisAlertClose() {
+            if (window._mapisAlertResolve) window._mapisAlertResolve();
+        }
+
+        function mapisLoading(show, title, message) {
+            const modal = document.getElementById('mapis-loading');
+            if (show) {
+                document.getElementById('mapis-loading-title').innerText = title || 'Cargando...';
+                document.getElementById('mapis-loading-msg').innerText = message || 'Procesando solicitud';
+                modal.classList.remove('hidden');
+            } else {
+                modal.classList.add('hidden');
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const confirmModal = document.getElementById('mapis-confirm');
+                const alertModal = document.getElementById('mapis-alert');
+                if (confirmModal && !confirmModal.classList.contains('hidden')) mapisConfirmCancel();
+                if (alertModal && !alertModal.classList.contains('hidden')) mapisAlertClose();
+            }
+        });
+
+        // ==============================================
+        // LÓGICA ADMIN
+        // ==============================================
+        async function entrarAdmin() {
+            const pass = document.getElementById('admin-pass').value;
+            if (!pass) {
+                return await mapisAlert('Contraseña requerida', 
+                    'Ingresa la contraseña de administrador.', 
+                    { icon: 'ph-key', type: 'warning' });
+            }
+            
+            mapisLoading(true, 'Verificando...', 'Comprobando credenciales');
+            
+            google.script.run
+                .withSuccessHandler(async (res) => {
+                    mapisLoading(false);
+                    if (res.success) {
+                        document.getElementById('login-admin').classList.add('hidden');
+                        document.getElementById('panel-admin').classList.remove('hidden');
+                    } else {
+                        await mapisAlert('Acceso denegado', 
+                            'La contraseña no es correcta.', 
+                            { icon: 'ph-lock-key', type: 'error' });
+                        document.getElementById('admin-pass').value = '';
+                    }
+                })
+                .withFailureHandler(async (err) => {
+                    mapisLoading(false);
+                    await mapisAlert('Error de conexión', String(err), 
+                        { icon: 'ph-wifi-slash', type: 'error' });
+                })
+                .validarAdmin(pass);
+        }
+
+        function cambiarTab(tab) {
+            ['crear', 'lista', 'editar', 'guias', 'roles', 'dashboard', 'sugerencias'].forEach(t => {
+                const el = document.getElementById(`view-${t}`);
+                if (el) el.classList.add('hidden-section');
+            });
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            
+            if (tab === 'crear') {
+                document.getElementById('view-crear').classList.remove('hidden-section');
+                document.getElementById('tab-crear').classList.add('active');
+            }
+        }
+
+        function toggleFormCrear(type) {
+            const isEst = type === 'est';
+            document.getElementById('form-crear-est').classList.toggle('hidden', !isEst);
+            document.getElementById('form-crear-doc').classList.toggle('hidden', isEst);
+            
+            document.getElementById('btn-crear-est').className = `flex-1 py-2 text-xs font-bold rounded-lg transition ${isEst ? 'bg-mapis-dark text-white' : 'bg-slate-200 text-slate-600'}`;
+            document.getElementById('btn-crear-doc').className = `flex-1 py-2 text-xs font-bold rounded-lg transition ${!isEst ? 'bg-mapis-dark text-white' : 'bg-slate-200 text-slate-600'}`;
+        }
+
+        async function guardarEstudiante(evt) {
+            const nombre = document.getElementById('new-est-nombre').value.trim();
+            const grado = document.getElementById('new-est-grado').value.trim();
+            const cedula = document.getElementById('new-est-cedula').value.trim();
+            const siglas = document.getElementById('new-est-siglas').value.trim().toUpperCase();
+            const anio = document.getElementById('new-est-anio').value.trim();
+            const email = document.getElementById('new-est-email').value.trim();
+            const saldo = document.getElementById('new-est-saldo').value.trim();
+            
+            if (!nombre || !grado || !cedula || !siglas || !anio) {
+                return await mapisAlert('Datos incompletos', 
+                    'Debes ingresar nombre, grado, últimos 4 de cédula, siglas y año.', 
+                    { icon: 'ph-warning-circle', type: 'warning' });
+            }
+            
+            if (cedula.length !== 4 || !/^\d{4}$/.test(cedula)) {
+                return await mapisAlert('Cédula inválida', 
+                    'Ingresa exactamente los últimos 4 dígitos numéricos de la cédula.', 
+                    { icon: 'ph-key', type: 'warning' });
+            }
+            
+            if (siglas.length < 2 || siglas.length > 4) {
+                return await mapisAlert('Siglas inválidas', 
+                    'Las siglas deben tener entre 2 y 4 letras.', 
+                    { icon: 'ph-warning-circle', type: 'warning' });
+            }
+            
+            const btn = evt.target;
+            const textoOriginal = btn.innerHTML;
+            btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i> Creando...';
+            btn.disabled = true;
+            
+            google.script.run
+                .withSuccessHandler(async (res) => {
+                    btn.innerHTML = textoOriginal;
+                    btn.disabled = false;
+                    if (res.success) {
+                        document.getElementById('qr-result').classList.remove('hidden');
+                        document.getElementById('hash-generado').innerText = res.codigo;
+                        document.getElementById('new-est-nombre').value = '';
+                        document.getElementById('new-est-grado').value = '';
+                        document.getElementById('new-est-cedula').value = '';
+                        document.getElementById('new-est-siglas').value = '';
+                        document.getElementById('new-est-anio').value = '';
+                        document.getElementById('new-est-email').value = '';
+                        document.getElementById('new-est-saldo').value = '';
+                        await mapisAlert(
+                            'Estudiante creado',
+                            `Código: ${res.codigo} con ${saldo || 0} puntos iniciales.`,
+                            { icon: 'ph-check-circle', type: 'success' }
+                        );
+                    } else {
+                        await mapisAlert('Error al crear', res.error, 
+                            { icon: 'ph-x-circle', type: 'error' });
+                    }
+                })
+                .withFailureHandler(async (err) => {
+                    btn.innerHTML = textoOriginal;
+                    btn.disabled = false;
+                    await mapisAlert('Error de conexión', String(err), 
+                        { icon: 'ph-wifi-slash', type: 'error' });
+                })
+                .crearEstudiante({ nombre, grado, cedula, siglas, anio, email, saldoInicial: Number(saldo) || 0 });
+        }
+
+        async function guardarDocente() {
+            const nombre = document.getElementById('new-doc-nombre').value.trim();
+            const pin = document.getElementById('new-doc-pin').value.trim();
+            
+            if (!nombre || !pin) {
+                return await mapisAlert('Datos incompletos', 
+                    'Completa el nombre y el PIN de 4 dígitos.', 
+                    { icon: 'ph-warning-circle', type: 'warning' });
+            }
+            
+            if (pin.length !== 4) {
+                return await mapisAlert('PIN inválido', 
+                    'El PIN debe tener exactamente 4 dígitos.', 
+                    { icon: 'ph-key', type: 'warning' });
+            }
+            
+            google.script.run
+                .withSuccessHandler(async (res) => {
+                    if (res.success) {
+                        document.getElementById('new-doc-nombre').value = '';
+                        document.getElementById('new-doc-pin').value = '';
+                        await mapisAlert('Docente creado', 
+                            `${nombre} fue registrado con éxito.`, 
+                            { icon: 'ph-check-circle', type: 'success' });
+                    } else {
+                        await mapisAlert('Error al crear', res.error, 
+                            { icon: 'ph-x-circle', type: 'error' });
+                    }
+                })
+                .withFailureHandler(async (err) => {
+                    await mapisAlert('Error de conexión', String(err), 
+                        { icon: 'ph-wifi-slash', type: 'error' });
+                })
+                .crearDocente({ nombre, pin });
+        }
+
+        function cargarLista(tipo) {
+            currentEditType = tipo;
+            ['crear', 'editar', 'guias', 'roles', 'dashboard', 'sugerencias'].forEach(t => {
+                const el = document.getElementById(`view-${t}`);
+                if (el) el.classList.add('hidden-section');
+            });
+            document.getElementById('view-lista').classList.remove('hidden-section');
+            
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tipo === 'estudiante' ? 'tab-edit-est' : 'tab-edit-doc').classList.add('active');
+            
+            document.getElementById('lista-titulo').innerText = tipo === 'estudiante' ? 'Editar Estudiantes' : 'Editar Docentes';
+            document.getElementById('lista-contenedor').innerHTML = '<p class="text-center text-slate-400 py-4">Cargando...</p>';
+
+            google.script.run.withSuccessHandler(lista => {
+                const cont = document.getElementById('lista-contenedor');
+                cont.innerHTML = '';
+                if (lista.length === 0) { 
+                    cont.innerHTML = '<p class="text-center text-slate-400">No hay registros</p>'; 
+                    return; 
+                }
+                
+                lista.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'p-3 bg-slate-50 border border-slate-200 rounded-xl flex justify-between items-center cursor-pointer hover:bg-mapis-light hover:border-mapis-dark/30 transition';
+                    div.onclick = () => abrirEditar(item.id, item.nombre, item.valor2, item.valor3);
+                    div.innerHTML = `
+                        <div>
+                            <p class="font-bold text-sm text-slate-800">${item.nombre}</p>
+                            <p class="text-[10px] text-slate-500">ID: ${item.id}</p>
+                        </div>
+                        <i class="ph-bold ph-pencil-simple text-slate-400"></i>`;
+                    cont.appendChild(div);
+                });
+            }).obtenerListaParaEditar(tipo);
+        }
+
+        function abrirEditar(id, nombre, val2, val3) {
+            currentEditId = id;
+            document.getElementById('view-lista').classList.add('hidden-section');
+            document.getElementById('view-editar').classList.remove('hidden-section');
+            
+            document.getElementById('edit-nombre').value = nombre;
+            document.getElementById('edit-valor2').value = val2;
+            
+            const lbl3 = document.getElementById('lbl-valor3');
+            const inp3 = document.getElementById('edit-valor3');
+            
+            if (currentEditType === 'estudiante') {
+                document.getElementById('lbl-valor2').innerText = 'Grado / Sección';
+                lbl3.classList.remove('hidden'); 
+                inp3.classList.remove('hidden');
+                inp3.value = val3;
+            } else {
+                document.getElementById('lbl-valor2').innerText = 'PIN de Acceso';
+                lbl3.classList.add('hidden'); 
+                inp3.classList.add('hidden');
+            }
+        }
+
+        function volverLista() { cargarLista(currentEditType); }
+
+        async function guardarEdicion() {
+            const data = {
+                id: currentEditId,
+                nombre: document.getElementById('edit-nombre').value,
+                pin: document.getElementById('edit-valor2').value,
+                grado: document.getElementById('edit-valor2').value,
+                email: document.getElementById('edit-valor3').value
+            };
+            
+            if (!data.nombre.trim()) {
+                return await mapisAlert('Nombre requerido', 
+                    'El nombre no puede estar vacío.', 
+                    { icon: 'ph-warning-circle', type: 'warning' });
+            }
+
+            const func = currentEditType === 'estudiante' ? 'editarEstudiante' : 'editarDocente';
+            
+            mapisLoading(true, 'Guardando cambios...', 'Actualizando en la base de datos');
+            
+            google.script.run
+                .withSuccessHandler(async (res) => {
+                    mapisLoading(false);
+                    if (res.success) {
+                        await mapisAlert('Cambios guardados', 
+                            'La información se actualizó correctamente.', 
+                            { icon: 'ph-check-circle', type: 'success' });
+                        volverLista();
+                    } else {
+                        await mapisAlert('Error al guardar', res.error, 
+                            { icon: 'ph-x-circle', type: 'error' });
+                    }
+                })
+                .withFailureHandler(async (err) => {
+                    mapisLoading(false);
+                    await mapisAlert('Error de conexión', String(err), 
+                        { icon: 'ph-wifi-slash', type: 'error' });
+                })[func](data);
+        }
+
+        // ==============================================
+        // GESTIÓN DE GUÍAS
+        // ==============================================
+        function cargarGuias() {
+            ['crear', 'lista', 'editar', 'roles', 'dashboard', 'sugerencias'].forEach(t => {
+                const el = document.getElementById(`view-${t}`);
+                if (el) el.classList.add('hidden-section');
+            });
+            document.getElementById('view-guias').classList.remove('hidden-section');
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab-guias').classList.add('active');
+            
+            google.script.run.withSuccessHandler(function(lista) {
+                const cont = document.getElementById('guias-contenedor');
+                cont.innerHTML = '';
+                if (!lista || lista.length === 0) {
+                    cont.innerHTML = '<p class="text-center text-slate-400 text-sm py-4">No hay guías asignados</p>';
+                } else {
+                    lista.forEach(g => {
+                        const div = document.createElement('div');
+                        div.className = 'p-3 bg-slate-50 border border-slate-200 rounded-xl flex justify-between items-center';
+                        div.innerHTML = `
+                            <div>
+                                <p class="font-bold text-sm">${g.nombreDocente}</p>
+                                <p class="text-[10px] text-slate-500">${g.idDocente} · 🎯 ${g.gradoAsignado}</p>
+                            </div>
+                            <button onclick="eliminarGuia('${g.idDocente}', '${g.gradoAsignado}')" class="text-red-500 text-xs font-bold hover:bg-red-50 px-2 py-1 rounded">Eliminar</button>
+                        `;
+                        cont.appendChild(div);
+                    });
+                }
+            }).obtenerListaGuias();
+            
+            google.script.run.withSuccessHandler(function(lista) {
+                const select = document.getElementById('guia-docente');
+                select.innerHTML = '<option value="">-- Selecciona docente --</option>';
+                lista.forEach(d => {
+                    const option = document.createElement('option');
+                    option.value = d.id;
+                    option.text = d.nombre + ' (' + d.id + ')';
+                    select.appendChild(option);
+                });
+            }).obtenerListaParaEditar('docente');
+        }
+
+        function asignarGuia() {
+            const idDocente = document.getElementById('guia-docente').value;
+            const grado = document.getElementById('guia-grado').value.trim();
+            if (!idDocente || !grado) {
+                return mapisAlert('Datos incompletos', 'Selecciona un docente y escribe el grado.', { icon: 'ph-warning-circle', type: 'warning' });
+            }
+            mapisLoading(true, 'Asignando...');
+            google.script.run.withSuccessHandler(function(res) {
+                mapisLoading(false);
+                if (res.success) {
+                    document.getElementById('guia-grado').value = '';
+                    cargarGuias();
+                } else {
+                    mapisAlert('Error', res.error, { icon: 'ph-x-circle', type: 'error' });
+                }
+            }).asignarGuia({ idDocente: idDocente, gradoAsignado: grado });
+        }
+
+        function eliminarGuia(idDocente, grado) {
+            mapisConfirm('Eliminar guía', '¿Quitar la asignación de ' + grado + '?', { danger: true, acceptText: 'Eliminar' })
+            .then((ok) => {
+                if (!ok) return;
+                google.script.run.withSuccessHandler(function(res) {
+                    if (res.success) cargarGuias();
+                }).eliminarGuia({ idDocente: idDocente, grado: grado });
+            });
+        }
+
+        // ==============================================
+        // ROLES ESPECIALES
+        // ==============================================
+        function cargarRoles() {
+            ['crear', 'lista', 'editar', 'guias', 'dashboard', 'sugerencias'].forEach(t => {
+                const el = document.getElementById(`view-${t}`);
+                if (el) el.classList.add('hidden-section');
+            });
+            document.getElementById('view-roles').classList.remove('hidden-section');
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab-roles').classList.add('active');
+            
+            google.script.run.withSuccessHandler(function(lista) {
+                const cont = document.getElementById('roles-contenedor');
+                cont.innerHTML = '';
+                if (!lista || lista.length === 0) {
+                    cont.innerHTML = '<p class="text-center text-slate-400 text-sm py-4">No hay roles asignados</p>';
+                } else {
+                    lista.forEach(r => {
+                        const div = document.createElement('div');
+                        div.className = 'p-3 bg-slate-50 border border-slate-200 rounded-xl flex justify-between items-center';
+                        const iconoRol = r.rol === 'coordinador' ? '🎯' : '📊';
+                        div.innerHTML = `
+                            <div>
+                                <p class="font-bold text-sm">${r.nombreDocente}</p>
+                                <p class="text-[10px] text-slate-500">${r.idDocente} · ${iconoRol} ${r.rol.toUpperCase()}</p>
+                            </div>
+                            <button onclick="eliminarRol('${r.idDocente}')" class="text-red-500 text-xs font-bold hover:bg-red-50 px-2 py-1 rounded">Eliminar</button>
+                        `;
+                        cont.appendChild(div);
+                    });
+                }
+            }).obtenerListaRoles();
+            
+            google.script.run.withSuccessHandler(function(lista) {
+                const select = document.getElementById('rol-docente');
+                select.innerHTML = '<option value="">-- Selecciona docente --</option>';
+                lista.forEach(d => {
+                    const option = document.createElement('option');
+                    option.value = d.id;
+                    option.text = d.nombre + ' (' + d.id + ')';
+                    select.appendChild(option);
+                });
+            }).obtenerListaParaEditar('docente');
+        }
+
+        function asignarRol() {
+            const idDocente = document.getElementById('rol-docente').value;
+            const rol = document.getElementById('rol-tipo').value;
+            if (!idDocente || !rol) {
+                return mapisAlert('Datos incompletos', 'Selecciona un docente y un rol.', { icon: 'ph-warning-circle', type: 'warning' });
+            }
+            mapisLoading(true, 'Asignando...');
+            google.script.run.withSuccessHandler(function(res) {
+                mapisLoading(false);
+                if (res.success) {
+                    document.getElementById('rol-tipo').value = '';
+                    cargarRoles();
+                } else {
+                    mapisAlert('Error', res.error, { icon: 'ph-x-circle', type: 'error' });
+                }
+            }).asignarRol({ idDocente: idDocente, rol: rol });
+        }
+
+        function eliminarRol(idDocente) {
+            mapisConfirm('Eliminar rol', '¿Quitar el rol especial de este docente?', { danger: true, acceptText: 'Eliminar' })
+            .then((ok) => {
+                if (!ok) return;
+                google.script.run.withSuccessHandler(function(res) {
+                    if (res.success) cargarRoles();
+                }).eliminarRol(idDocente);
+            });
+        }
+
+        // ==============================================
+        // DASHBOARD
+        // ==============================================
+        function cargarDashboard() {
+            ['crear', 'lista', 'editar', 'guias', 'roles', 'sugerencias'].forEach(t => {
+                const el = document.getElementById(`view-${t}`);
+                if (el) el.classList.add('hidden-section');
+            });
+            document.getElementById('view-dashboard').classList.remove('hidden-section');
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab-dashboard').classList.add('active');
+            
+            const hoy = new Date();
+            const mesActual = hoy.getFullYear() + '-' + String(hoy.getMonth() + 1).padStart(2, '0');
+            document.getElementById('dash-mes').value = mesActual;
+            
+            actualizarDashboard();
+        }
+
+        function actualizarDashboard() {
+            const mesInput = document.getElementById('dash-mes').value;
+            if (!mesInput) {
+                return mapisAlert('Selecciona un mes', 'Debes elegir el mes que quieres analizar.', { icon: 'ph-calendar', type: 'warning' });
+            }
+            
+            const [anio, mes] = mesInput.split('-');
+            const contenedor = document.getElementById('dashboard-contenido');
+            contenedor.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">Cargando datos...</p>';
+            
+            google.script.run.withSuccessHandler(function(res) {
+                if (!res.success) {
+                    contenedor.innerHTML = '<p class="text-xs text-red-500 text-center py-4">' + (res.error || 'Error') + '</p>';
+                    return;
+                }
+                
+                let html = '';
+                
+                html += `
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="bg-mapis-light p-3 rounded-xl border border-mapis-dark/10">
+                            <p class="text-[10px] text-mapis-dark font-bold uppercase">Incidencias</p>
+                            <p class="text-2xl font-black text-mapis-dark">${res.metricas.totalIncidencias}</p>
+                        </div>
+                        <div class="bg-mapis-light p-3 rounded-xl border border-mapis-dark/10">
+                            <p class="text-[10px] text-mapis-dark font-bold uppercase">Canjes</p>
+                            <p class="text-2xl font-black text-mapis-dark">${res.metricas.totalCanjes}</p>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                            <p class="text-[10px] text-slate-500 font-bold uppercase">Estudiantes</p>
+                            <p class="text-2xl font-black text-slate-700">${res.metricas.totalEstudiantes}</p>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                            <p class="text-[10px] text-slate-500 font-bold uppercase">Saldo prom.</p>
+                            <p class="text-2xl font-black text-slate-700">${res.metricas.saldoPromedio}</p>
+                        </div>
+                    </div>
+                `;
+                
+                if (res.topIncidencias && res.topIncidencias.length > 0) {
+                    html += `<div class="mt-4"><p class="text-xs font-bold text-mapis-dark mb-2">🔥 Incidencias más frecuentes</p><div class="space-y-1">`;
+                    res.topIncidencias.forEach((it, idx) => {
+                        html += `<div class="flex justify-between items-center p-2 bg-slate-50 rounded-lg border border-slate-200 text-xs">
+                            <span class="font-bold text-slate-700">${idx + 1}. ${it.tipo}</span>
+                            <span class="bg-red-100 text-red-700 px-2 py-0.5 rounded font-bold">${it.count}</span>
+                        </div>`;
+                    });
+                    html += `</div></div>`;
+                }
+                
+                if (res.topGrados && res.topGrados.length > 0) {
+                    html += `<div class="mt-4"><p class="text-xs font-bold text-mapis-dark mb-2">🏫 Grados con más incidencias</p><div class="space-y-1">`;
+                    res.topGrados.forEach((it, idx) => {
+                        html += `<div class="flex justify-between items-center p-2 bg-slate-50 rounded-lg border border-slate-200 text-xs">
+                            <span class="font-bold text-slate-700">${idx + 1}. ${it.grado}</span>
+                            <span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-bold">${it.count}</span>
+                        </div>`;
+                    });
+                    html += `</div></div>`;
+                }
+                
+                if (res.topEstudiantes && res.topEstudiantes.length > 0) {
+                    html += `<div class="mt-4"><p class="text-xs font-bold text-mapis-dark mb-2">👤 Estudiantes con más incidencias</p><div class="space-y-1">`;
+                    res.topEstudiantes.forEach((it, idx) => {
+                        html += `<div class="flex justify-between items-center p-2 bg-slate-50 rounded-lg border border-slate-200 text-xs">
+                            <div>
+                                <p class="font-bold text-slate-700">${idx + 1}. ${it.nombre}</p>
+                                <p class="text-[9px] text-slate-400">${it.grado} · ${it.id}</p>
+                            </div>
+                            <span class="bg-red-100 text-red-700 px-2 py-0.5 rounded font-bold">${it.count}</span>
+                        </div>`;
+                    });
+                    html += `</div></div>`;
+                }
+                
+                if (res.metricas.totalIncidencias === 0 && res.metricas.totalCanjes === 0) {
+                    html += '<p class="text-xs text-slate-400 text-center py-4 mt-4">Sin datos para este período</p>';
+                }
+                
+                contenedor.innerHTML = html;
+            }).withFailureHandler(function(err) {
+                contenedor.innerHTML = '<p class="text-xs text-red-500 text-center py-4">Error: ' + err + '</p>';
+            }).obtenerDashboard({
+                idDocente: 'ADMIN',
+                mes: parseInt(mes),
+                anio: parseInt(anio)
+            });
+        }
+
+        // ==============================================
+        // BUZÓN DE SUGERENCIAS
+        // ==============================================
+        function cargarSugerencias() {
+            ['crear', 'lista', 'editar', 'guias', 'roles', 'dashboard'].forEach(t => {
+                const el = document.getElementById(`view-${t}`);
+                if (el) el.classList.add('hidden-section');
+            });
+            document.getElementById('view-sugerencias').classList.remove('hidden-section');
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab-sugerencias').classList.add('active');
+            
+            google.script.run.withSuccessHandler(function(lista) {
+                const cont = document.getElementById('sugerencias-contenedor');
+                cont.innerHTML = '';
+                if (!lista || lista.length === 0) {
+                    cont.innerHTML = '<p class="text-center text-slate-400 text-sm py-4">No hay sugerencias todavía</p>';
+                    return;
+                }
+                lista.forEach(s => {
+                    const div = document.createElement('div');
+                    div.className = 'p-3 bg-white border border-slate-200 rounded-xl shadow-sm';
+                    const tipoColor = s.tipo === 'Error' ? 'bg-red-100 text-red-700' 
+                                    : s.tipo === 'Propuesta' ? 'bg-emerald-100 text-emerald-700'
+                                    : 'bg-amber-100 text-amber-700';
+                    div.innerHTML = `
+                        <div class="flex justify-between items-start mb-1">
+                            <p class="text-[10px] text-slate-500">${s.fecha} · ${s.autor} (${s.rolAutor})</p>
+                            <span class="${tipoColor} px-2 py-0.5 rounded text-[9px] font-bold">${s.tipo}</span>
+                        </div>
+                        <p class="text-xs text-slate-700 leading-relaxed">${s.mensaje}</p>
+                    `;
+                    cont.appendChild(div);
+                });
+            }).obtenerSugerencias();
+        }
+    </script>
+</body>
+</html>
