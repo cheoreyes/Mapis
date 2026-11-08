@@ -3,302 +3,981 @@
 <head>
     <base target="_top">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/cheoreyes/Mapis_image/main/insignia.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://raw.githubusercontent.com/cheoreyes/Mapis_image/main/insignia.png">
+    <link rel="manifest" href='data:application/manifest+json,{"name":"MAPIS","short_name":"MAPIS","start_url":".","display":"standalone","background_color":"#2a3376","theme_color":"#2a3376","icons":[{"src":"https://raw.githubusercontent.com/cheoreyes/Mapis_image/main/insignia.png","sizes":"192x192","type":"image/png"},{"src":"https://raw.githubusercontent.com/cheoreyes/Mapis_image/main/insignia.png","sizes":"512x512","type":"image/png"}]}'>
+    <meta name="theme-color" content="#2a3376">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="MAPIS">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        mapis: {
+                            dark: '#2a3376',
+                            mid: '#1f2860',
+                            light: '#e8ebf7',
+                            gold: '#fcb713',
+                            goldDark: '#d99e0a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <style>
         body { font-family: 'Inter', system-ui, sans-serif; background-color: #f8fafc; }
-        .fade-in { animation: fadeIn 0.3s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        
-        /* Estilo select personalizado */
-        .custom-select {
-            appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 1rem center;
-            background-size: 1em;
-        }
+        #student-search { font-size: 1rem; letter-spacing: 0.01em; }
     </style>
 </head>
 <body class="h-screen flex flex-col overflow-hidden bg-slate-50">
 
-    <!-- HEADER -->
-    <header class="bg-slate-900 text-white p-4 shadow-lg z-20 flex-shrink-0">
-        <div class="flex justify-between items-center max-w-md mx-auto w-full">
-            <div class="flex items-center gap-2">
-                <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-sm">M</div>
-                <h1 class="font-bold text-lg tracking-tight">MAPIS DOCENTE</h1>
+    <header class="bg-gradient-to-r from-mapis-dark to-mapis-mid text-white shadow-lg z-20 flex-shrink-0">
+        <div class="flex justify-between items-center max-w-md mx-auto w-full p-4">
+            <div class="flex items-center gap-2.5">
+                <img src="https://raw.githubusercontent.com/cheoreyes/Mapis_image/main/insignia.png" alt="MAPIS" class="w-9 h-9 rounded-lg object-cover border border-white/20">
+                <div class="flex flex-col leading-tight">
+                    <h1 class="font-black text-sm tracking-tight">MAPIS DOCENTE</h1>
+                    <span class="text-[8px] opacity-75 font-medium tracking-wider">U.E. MARIANO PICÓN SALAS</span>
+                </div>
             </div>
-            <span class="text-[10px] font-bold bg-blue-600/30 text-blue-200 px-2 py-1 rounded-full border border-blue-500/30">v2.5 TOAST</span>
+            <span class="text-[9px] font-bold bg-mapis-gold/30 text-white px-2 py-1 rounded-full border border-mapis-gold/40">
+                #SomosMapis
+            </span>
         </div>
     </header>
 
     <main class="flex-1 overflow-y-auto relative w-full max-w-md mx-auto bg-white shadow-xl min-h-0">
         
         <!-- VISTA LOGIN -->
-        <div id="view-login" class="flex flex-col items-center justify-center h-full p-6 space-y-6 fade-in">
+        <div id="view-login" class="flex flex-col items-center justify-center h-full p-6 space-y-6">
             <div class="text-center mb-4">
-                <div class="w-20 h-20 bg-blue-100 text-blue-600 rounded-full mx-auto flex items-center justify-center text-4xl mb-4">
+                <div class="w-20 h-20 bg-mapis-light text-mapis-dark rounded-full mx-auto flex items-center justify-center text-4xl mb-4 border-2 border-mapis-dark/20">
                     <i class="ph-fill ph-lock-key"></i>
                 </div>
-                <h2 class="text-2xl font-bold text-slate-800">Acceso Docente</h2>
-                <p class="text-sm text-slate-500">Ingresa tu PIN de seguridad</p>
+                <h2 class="text-2xl font-black text-mapis-dark">Acceso Docente</h2>
+                <p class="text-sm text-slate-500 mt-1">Ingresa tu PIN de seguridad</p>
             </div>
             <div class="w-full max-w-xs space-y-4">
-                <input type="number" id="pin-input" maxlength="4" inputmode="numeric" pattern="[0-9]*"
-                    class="block w-full text-center text-3xl tracking-[0.5em] py-4 border border-slate-300 rounded-2xl bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition shadow-sm" 
+                <input type="number" id="pin-input" maxlength="4" inputmode="numeric"
+                    class="block w-full text-center text-3xl tracking-[0.5em] py-4 border-2 border-slate-200 rounded-2xl bg-white focus:outline-none focus:border-mapis-dark focus:ring-2 focus:ring-mapis-dark/20 transition shadow-sm" 
                     placeholder="••••">
-                <button onclick="loginDocente()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-lg transition active:scale-95">
+                <button id="btn-login" class="w-full bg-mapis-dark hover:bg-mapis-mid text-white font-bold py-4 rounded-2xl shadow-lg transition active:scale-95">
                     Ingresar
                 </button>
+                <p id="login-error" class="hidden text-xs text-red-600 text-center font-medium"></p>
             </div>
+            <p class="text-[10px] text-slate-400 text-center mt-6">
+                Los Robles, Nueva Esparta • Venezuela<br>
+                Fundada en 2008
+            </p>
         </div>
 
         <!-- VISTA DASHBOARD -->
-        <div id="view-dashboard" class="hidden flex-col h-full p-6 pb-24 overflow-y-auto fade-in">
+        <div id="view-dashboard" class="hidden flex-col h-full p-6 pb-24 overflow-y-auto">
             
-            <!-- Info Docente -->
-            <div class="flex justify-between items-center mb-6 bg-blue-50 p-3 rounded-xl border border-blue-100">
+            <div class="flex justify-between items-center mb-4 bg-mapis-light p-3 rounded-xl border border-mapis-dark/10">
                 <div class="flex items-center gap-2">
-                    <i class="ph-fill ph-chalkboard-teacher text-blue-600 text-xl"></i>
-                    <span id="docente-nombre" class="font-bold text-blue-900 text-sm">Profesor...</span>
+                    <i class="ph-fill ph-chalkboard-teacher text-mapis-dark text-xl"></i>
+                    <div class="flex flex-col leading-tight">
+                        <span id="docente-nombre" class="font-bold text-mapis-dark text-sm">Profesor...</span>
+                        <span id="docente-grado" class="text-[10px] text-mapis-dark/70 font-semibold"></span>
+                    </div>
                 </div>
-                <button onclick="logoutDocente()" class="text-xs text-red-600 font-bold hover:bg-red-50 px-2 py-1 rounded-lg">Salir</button>
+                <button id="btn-logout" class="text-xs text-red-600 font-bold hover:bg-red-50 px-2 py-1 rounded-lg">Salir</button>
             </div>
 
-            <!-- BUSCADOR POR NOMBRE -->
-            <div class="space-y-3 mb-2">
+            <!-- BOTONES DE ACCESO RÁPIDO -->
+          <div id="accesos-rapidos" class="mb-4">
+                <div id="btn-dashboard-container" class="grid grid-cols-2 gap-2">
+                    <button onclick="abrirDashboard()" class="bg-mapis-dark text-white text-xs font-bold py-2.5 rounded-xl hover:bg-mapis-mid transition flex items-center justify-center gap-1.5">
+                        <i class="ph-fill ph-chart-bar"></i> Dashboard
+                    </button>
+                    <button onclick="abrirBuzon()" class="bg-mapis-gold text-mapis-dark text-xs font-bold py-2.5 rounded-xl hover:bg-mapis-goldDark transition flex items-center justify-center gap-1.5">
+                        <i class="ph-fill ph-chat-circle-dots"></i> Sugerir
+                    </button>
+                </div>
+                <div id="btn-solo-sugerir-container" class="hidden">
+                    <button onclick="abrirBuzon()" class="w-full bg-mapis-gold text-mapis-dark text-xs font-bold py-2.5 rounded-xl hover:bg-mapis-goldDark transition flex items-center justify-center gap-1.5">
+                        <i class="ph-fill ph-chat-circle-dots"></i> Sugerir
+                    </button>
+                </div>
+            </div>
+
+            <!-- VER SUGERENCIAS (solo coordinador/director) -->
+            <div id="btn-ver-sugerencias-container" class="hidden mb-6">
+                <button onclick="abrirVerSugerencias()" class="w-full bg-emerald-600 text-white text-xs font-bold py-2.5 rounded-xl hover:bg-emerald-700 transition flex items-center justify-center gap-1.5">
+                    <i class="ph-fill ph-inbox"></i> Ver Buzón de Sugerencias
+                </button>
+            </div>
+
+            <!-- SOLICITUDES -->
+            <div id="solicitudes-section" class="hidden mb-6">
+                <h3 class="text-xs font-bold text-mapis-gold uppercase tracking-wider ml-1 mb-2 flex items-center gap-2">
+                    <i class="ph-fill ph-paper-plane-tilt"></i> Solicitudes de Canje Pendientes
+                </h3>
+                <div id="solicitudes-container" class="space-y-2">
+                    <p class="text-xs text-slate-400 text-center py-2">Cargando solicitudes...</p>
+                </div>
+            </div>
+
+            <!-- BUSCADOR INTELIGENTE -->
+            <div class="space-y-2 mb-2 relative">
                 <label class="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Identificar Alumno</label>
                 <div class="relative">
-                    <select id="student-select" onchange="seleccionarAlumno(this.value)" 
-                        class="custom-select block w-full px-4 py-3 pr-8 border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-bold text-slate-700 transition appearance-none cursor-pointer">
-                        <option value="" disabled selected>-- Selecciona o escribe nombre --</option>
-                    </select>
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <i class="ph ph-magnifying-glass text-slate-400 text-lg"></i>
-                    </div>
+                    <input type="text" id="student-search" autocomplete="off"
+                        placeholder="🔍 Nombre, apellido o cédula..."
+                        class="block w-full px-4 py-3 pr-10 border-2 border-slate-300 rounded-xl bg-white focus:outline-none focus:border-mapis-dark focus:ring-2 focus:ring-mapis-dark/20 font-semibold text-slate-800 transition">
+                    <button onclick="limpiarBusqueda()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 hidden" id="btn-clear-search">
+                        <i class="ph-bold ph-x-circle text-lg"></i>
+                    </button>
                 </div>
+                <div id="search-results" class="hidden absolute z-30 left-0 right-0 mt-1 bg-white border-2 border-mapis-dark/20 rounded-xl shadow-2xl max-h-80 overflow-y-auto"></div>
             </div>
 
-            <!-- TARJETA ALUMNO (Bajada con mt-6 para no tapar foto) -->
-            <div id="student-card" class="hidden bg-white rounded-3xl shadow-lg border border-slate-100 text-center relative overflow-hidden mb-4 mt-6 transition-all transform scale-100">
-                <div class="h-20 bg-gradient-to-br from-blue-500 to-indigo-600 absolute top-0 w-full"></div>
-                
+            <div id="student-card" class="hidden bg-white rounded-3xl shadow-lg border border-slate-100 text-center relative overflow-hidden mb-4 mt-6">
+                <div class="h-20 bg-gradient-to-br from-mapis-dark to-mapis-mid absolute top-0 w-full"></div>
                 <div class="relative pt-6 pb-4 px-6 z-10">
                     <div class="relative w-24 h-24 mx-auto mb-3">
-                        <img id="stu-photo" src="" alt="Foto" class="w-full h-full rounded-full object-cover border-4 border-white shadow-lg bg-gray-100">
-                        <div class="absolute bottom-0 right-0 bg-green-500 w-6 h-6 rounded-full border-2 border-white flex items-center justify-center shadow-sm">
-                            <i class="ph-bold ph-check text-white text-xs"></i>
-                        </div>
+                        <img id="stu-photo" src="https://raw.githubusercontent.com/cheoreyes/Mapis_image/main/insignia.png" alt="Insignia" class="w-full h-full rounded-full object-cover border-4 border-white shadow-lg bg-gray-100">
                     </div>
-                    
                     <h2 id="stu-name" class="text-xl font-black text-slate-800 leading-tight mb-1">--</h2>
                     <p id="stu-grade" class="text-slate-500 text-xs font-medium uppercase tracking-wide mb-3">--</p>
-                    
-                    <div class="inline-flex flex-col items-center bg-slate-50 px-4 py-1.5 rounded-xl border border-slate-100 shadow-inner">
-                        <span class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Saldo</span>
-                        <span id="stu-balance" class="text-2xl font-black text-emerald-600">--</span>
+                    <div class="inline-flex flex-col items-center bg-mapis-light px-4 py-1.5 rounded-xl border border-mapis-dark/10">
+                        <span class="text-[9px] text-mapis-dark font-bold uppercase tracking-widest">Saldo Actual</span>
+                        <span id="stu-balance" class="text-2xl font-black text-mapis-dark">--</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Grid Acciones -->
-            <div id="actions-grid" class="opacity-50 pointer-events-none transition-opacity duration-300 space-y-4 mt-4">
-                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1 mb-2">Registrar Conducta Rápida</h3>
-                <div class="grid grid-cols-2 gap-3">
-                    <button onclick="sendTransaction(50, 'Entrega Anticipada', 'Académico')" class="group bg-emerald-50 border border-emerald-200 text-emerald-700 p-4 rounded-2xl font-bold transition-all flex flex-col items-center gap-2 shadow-sm active:scale-95">
-                        <i class="ph-fill ph-check-circle text-3xl"></i> <span>+50 pts</span> <span class="text-[10px] font-normal opacity-70">Entrega Ant.</span>
-                    </button>
-                    <button onclick="sendTransaction(30, 'Participación Activa', 'Académico')" class="group bg-teal-50 border border-teal-200 text-teal-700 p-4 rounded-2xl font-bold transition-all flex flex-col items-center gap-2 shadow-sm active:scale-95">
-                        <i class="ph-fill ph-hand-raised text-3xl"></i> <span>+30 pts</span> <span class="text-[10px] font-normal opacity-70">Participación</span>
-                    </button>
-                    <button onclick="sendTransaction(-20, 'Interrupción Clase', 'Hábitos')" class="group bg-red-50 border border-red-200 text-red-700 p-4 rounded-2xl font-bold transition-all flex flex-col items-center gap-2 shadow-sm active:scale-95">
-                        <i class="ph-fill ph-warning-circle text-3xl"></i> <span>-20 pts</span> <span class="text-[10px] font-normal opacity-70">Interrupción</span>
-                    </button>
-                    <button onclick="sendTransaction(-30, 'Celular sin Permiso', 'Hábitos')" class="group bg-rose-50 border border-rose-200 text-rose-700 p-4 rounded-2xl font-bold transition-all flex flex-col items-center gap-2 shadow-sm active:scale-95">
-                        <i class="ph-fill ph-device-mobile-slash text-3xl"></i> <span>-30 pts</span> <span class="text-[10px] font-normal opacity-70">Celular</span>
-                    </button>
+            <div id="nota-container" class="hidden mb-4">
+                <label class="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1 mb-2 block">Observación (Opcional)</label>
+                <textarea id="optional-note" rows="2" placeholder="Ej: Llegó tarde..." 
+                    class="w-full p-3 rounded-xl border border-slate-200 bg-white focus:border-mapis-dark outline-none transition text-sm resize-none"></textarea>
+            </div>
+
+            <div id="actions-grid" class="opacity-50 pointer-events-none space-y-4 mt-4">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1 mb-2">Registrar Incidencia</h3>
+                <div id="conductas-container" class="grid grid-cols-1 gap-3">
+                    <p class="text-xs text-slate-400 text-center py-2">Cargando...</p>
                 </div>
-                <button onclick="resetStudentCard()" class="w-full mt-4 py-3 text-slate-500 font-semibold hover:text-slate-800 hover:bg-slate-100 rounded-xl transition flex items-center justify-center gap-2">
-                    <i class="ph-bold ph-arrows-counter-clockwise"></i> Buscar otro alumno
+
+                <button id="btn-reset" class="w-full mt-6 py-3 text-slate-500 font-semibold hover:text-mapis-dark hover:bg-mapis-light rounded-xl transition">
+                    Buscar otro alumno
                 </button>
             </div>
         </div>
 
-        <!-- OVERLAY CARGA -->
-        <div id="overlay-status" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center backdrop-blur-sm">
-            <div class="bg-white p-6 rounded-2xl shadow-xl text-center max-w-xs mx-4">
-                <div id="status-icon" class="text-4xl mb-2 animate-pulse">⏳</div>
-                <h3 id="status-title" class="font-bold text-lg text-slate-800">Cargando...</h3>
+        <!-- MODAL ALERT -->
+        <div id="mapis-alert" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4" style="background: rgba(15,23,42,0.7);">
+            <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 text-center max-h-[80vh] overflow-y-auto">
+                <h3 id="alert-title" class="text-lg font-black text-slate-800 mb-2">Info</h3>
+                <div id="alert-message" class="text-sm text-slate-500 mb-6">Mensaje</div>
+                <button id="btn-alert-close" class="w-full py-3 bg-mapis-dark text-white font-bold rounded-xl">OK</button>
             </div>
         </div>
 
-        <!-- NOTIFICACIÓN TOAST (Reemplazo de Alert) -->
-        <div id="toast-notification" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 z-[60] transition-all duration-300 opacity-0 translate-y-10 pointer-events-none max-w-[90%]">
-            <div id="toast-icon" class="text-xl"></div>
-            <span id="toast-message" class="font-medium text-sm">Mensaje aquí</span>
+        <!-- MODAL LOADING -->
+        <div id="mapis-loading" class="hidden fixed inset-0 z-[110] flex items-center justify-center" style="background: rgba(15,23,42,0.75);">
+            <div class="bg-white rounded-3xl shadow-2xl p-8 text-center">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-full border-4 border-mapis-light border-t-mapis-dark animate-spin"></div>
+                <h3 id="loading-title" class="font-black text-base text-slate-800">Cargando...</h3>
+            </div>
+        </div>
+
+        <!-- MODAL DASHBOARD -->
+        <div id="dash-modal" class="hidden fixed inset-0 z-[120] flex items-start justify-center p-4 overflow-y-auto" style="background: rgba(15,23,42,0.85);">
+            <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md my-6">
+                <div class="bg-gradient-to-r from-mapis-dark to-mapis-mid text-white p-4 flex justify-between items-center rounded-t-3xl">
+                    <div class="flex items-center gap-2">
+                        <i class="ph-fill ph-chart-bar text-xl"></i>
+                        <span class="font-bold text-sm">Dashboard Institucional</span>
+                    </div>
+                    <button onclick="cerrarDashboard()" class="text-white/80 hover:text-white"><i class="ph-bold ph-x text-xl"></i></button>
+                </div>
+                
+                <div class="p-4 space-y-3">
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Desde</label>
+                            <input type="date" id="filtro-fecha-desde" class="w-full p-2 border border-slate-300 rounded-lg text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Hasta</label>
+                            <input type="date" id="filtro-fecha-hasta" class="w-full p-2 border border-slate-300 rounded-lg text-xs">
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Docente</label>
+                            <select id="filtro-docente" class="w-full p-2 border border-slate-300 rounded-lg text-xs">
+                                <option value="">Todos</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Grado</label>
+                            <select id="filtro-grado" class="w-full p-2 border border-slate-300 rounded-lg text-xs">
+                                <option value="">Todos</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Estudiante</label>
+                        <select id="filtro-estudiante" class="w-full p-2 border border-slate-300 rounded-lg text-xs">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                    
+                    <div class="flex gap-2">
+                        <button onclick="aplicarFiltrosDashboard()" class="flex-1 bg-mapis-dark text-white py-2 rounded-lg font-bold text-xs hover:bg-mapis-mid">
+                            Aplicar Filtros
+                        </button>
+                        <button onclick="limpiarFiltrosDashboard()" class="bg-slate-200 text-slate-600 px-3 py-2 rounded-lg font-bold text-xs hover:bg-slate-300">
+                            Limpiar
+                        </button>
+                    </div>
+                    
+                    <div id="dash-contenido" class="space-y-3 pt-3 border-t border-slate-200">
+                        <p class="text-xs text-slate-400 text-center py-4">Aplicando filtros...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL BUZÓN ENVIAR -->
+        <div id="buzon-modal" class="hidden fixed inset-0 z-[120] flex items-center justify-center p-4" style="background: rgba(15,23,42,0.85);">
+            <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md">
+                <div class="bg-gradient-to-r from-mapis-gold to-mapis-goldDark text-mapis-dark p-4 flex justify-between items-center rounded-t-3xl">
+                    <div class="flex items-center gap-2">
+                        <i class="ph-fill ph-chat-circle-dots text-xl"></i>
+                        <span class="font-bold text-sm">Buzón de Sugerencias</span>
+                    </div>
+                    <button onclick="cerrarBuzon()" class="text-mapis-dark/70 hover:text-mapis-dark"><i class="ph-bold ph-x text-xl"></i></button>
+                </div>
+                
+                <div class="p-5 space-y-3">
+                    <p class="text-xs text-slate-500">Tu opinión nos ayuda a mejorar MAPIS. Cuéntanos qué ideas tienes o qué problemas has visto.</p>
+                    
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Tipo</label>
+                        <select id="buzon-tipo" class="w-full p-2 border border-slate-300 rounded-lg text-sm">
+                            <option value="Sugerencia">💡 Sugerencia</option>
+                            <option value="Propuesta">🚀 Propuesta</option>
+                            <option value="Error">🐞 Reporte de Error</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Mensaje</label>
+                        <textarea id="buzon-mensaje" rows="5" placeholder="Escribe tu sugerencia aquí..."
+                            class="w-full p-3 border border-slate-300 rounded-lg text-sm focus:border-mapis-dark outline-none resize-none"></textarea>
+                    </div>
+                    
+                    <button onclick="enviarSugerenciaDocente()" class="w-full bg-mapis-dark text-white py-3 rounded-lg font-bold text-sm hover:bg-mapis-mid">
+                        Enviar Sugerencia
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL VER SUGERENCIAS (coordinador/director) -->
+        <div id="ver-sugerencias-modal" class="hidden fixed inset-0 z-[120] flex items-start justify-center p-4 overflow-y-auto" style="background: rgba(15,23,42,0.85);">
+            <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md my-6">
+                <div class="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white p-4 flex justify-between items-center rounded-t-3xl">
+                    <div class="flex items-center gap-2">
+                        <i class="ph-fill ph-inbox text-xl"></i>
+                        <span class="font-bold text-sm">Buzón de Sugerencias</span>
+                    </div>
+                    <button onclick="cerrarVerSugerencias()" class="text-white/80 hover:text-white"><i class="ph-bold ph-x text-xl"></i></button>
+                </div>
+                
+                <div class="p-4">
+                    <div id="ver-sugerencias-contenedor" class="space-y-2 max-h-[70vh] overflow-y-auto">
+                        <p class="text-xs text-slate-400 text-center py-4">Cargando...</p>
+                    </div>
+                </div>
+            </div>
         </div>
 
     </main>
 
     <script>
-        let sessionDocente = { id: null, nombre: null };
-        let currentStudentData = null; 
+        var sessionDocente = { id: null, nombre: null, grados: [], rol: null };
+        var currentStudentData = null;
+        var configuracion = { conductas: [] };
+        var listaAlumnos = [];
 
-        window.onload = function() {
-            document.getElementById('pin-input').focus();
-        };
-
-        // --- SISTEMA DE NOTIFICACIONES TOAST ---
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('toast-notification');
-            const iconEl = document.getElementById('toast-icon');
-            const msgEl = document.getElementById('toast-message');
-            
-            msgEl.innerText = message;
-            
-            if (type === 'success') {
-                iconEl.innerHTML = '<i class="ph-fill ph-check-circle text-emerald-400"></i>';
-                toast.className = "fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 z-[60] transition-all duration-300 max-w-[90%]";
-            } else {
-                iconEl.innerHTML = '<i class="ph-fill ph-warning-circle text-red-400"></i>';
-                toast.className = "fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-red-600 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 z-[60] transition-all duration-300 max-w-[90%]";
-            }
-
-            // Mostrar
-            toast.classList.remove('opacity-0', 'translate-y-10', 'pointer-events-none');
-            
-            // Ocultar solo 3 seg
-            setTimeout(() => {
-                toast.classList.add('opacity-0', 'translate-y-10', 'pointer-events-none');
-            }, 3000);
+        function showAlert(title, message) {
+            document.getElementById('alert-title').innerText = title;
+            document.getElementById('alert-message').innerHTML = message;
+            document.getElementById('mapis-alert').classList.remove('hidden');
+        }
+        function hideAlert() {
+            document.getElementById('mapis-alert').classList.add('hidden');
+        }
+        function showLoading(title) {
+            document.getElementById('loading-title').innerText = title || 'Cargando...';
+            document.getElementById('mapis-loading').classList.remove('hidden');
+        }
+        function hideLoading() {
+            document.getElementById('mapis-loading').classList.add('hidden');
+        }
+        function showLoginError(msg) {
+            var errorEl = document.getElementById('login-error');
+            errorEl.innerText = msg;
+            errorEl.classList.remove('hidden');
+        }
+        function hideLoginError() {
+            document.getElementById('login-error').classList.add('hidden');
         }
 
         function loginDocente() {
-            const pin = document.getElementById('pin-input').value.trim();
-            if (!pin) return showToast("Ingresa tu PIN", 'error');
+            var pin = document.getElementById('pin-input').value.trim();
+            var btn = document.getElementById('btn-login');
+            hideLoginError();
             
-            showStatus(true, 'Verificando...');
-            google.script.run.withSuccessHandler(function(res) {
-                showStatus(false);
-                if (res.success) {
-                    sessionDocente = { id: res.idDocente, nombre: res.nombreDocente };
+            if (!pin) {
+                showLoginError('Ingresa tu PIN de 4 dígitos.');
+                return;
+            }
+            
+            btn.innerHTML = 'Verificando...';
+            btn.disabled = true;
+            
+            google.script.run
+                .withSuccessHandler(function(res) {
+                    btn.innerHTML = 'Ingresar';
+                    btn.disabled = false;
+                    
+                    if (!res || !res.success) {
+                        showLoginError(res ? (res.error || 'PIN incorrecto') : 'Error desconocido');
+                        return;
+                    }
+                    
+                    const grados = res.gradosAsignados || [];
+                    const rol = res.rol || null;
+                    sessionDocente = { id: res.idDocente, nombre: res.nombreDocente, grados: grados, rol: rol };
                     document.getElementById('docente-nombre').innerText = res.nombreDocente;
+                    
+                    let rolTexto = '';
+                    if (rol === 'coordinador') rolTexto = ' · 🎯 Coordinador';
+                    else if (rol === 'director') rolTexto = ' · 📊 Director';
+                    
+                    if (grados.length === 0) {
+                        document.getElementById('docente-grado').innerText = rol ? 'Rol:' + rolTexto : '⚠️ Sin grado asignado';
+                    } else if (grados.length === 1) {
+                        document.getElementById('docente-grado').innerText = '🎯 ' + grados[0] + rolTexto;
+                    } else {
+                        document.getElementById('docente-grado').innerText = '🎯 Guía de ' + grados.length + ' grados' + rolTexto;
+                    }
+                    
+                    if (rol === 'coordinador' || rol === 'director') {
+                        document.getElementById('btn-ver-sugerencias-container').classList.remove('hidden');
+                    } else {
+                        document.getElementById('btn-ver-sugerencias-container').classList.add('hidden');
+                    }
+                                        // ⚠️ Si es rol "electiva", ocultar Dashboard y mostrar solo Sugerir
+                    if (rol === 'electiva') {
+                        document.getElementById('btn-dashboard-container').classList.add('hidden');
+                        document.getElementById('btn-solo-sugerir-container').classList.remove('hidden');
+                    } else {
+                        document.getElementById('btn-dashboard-container').classList.remove('hidden');
+                        document.getElementById('btn-solo-sugerir-container').classList.add('hidden');
+                    }
+
                     document.getElementById('view-login').classList.add('hidden');
                     document.getElementById('view-dashboard').classList.remove('hidden');
                     document.getElementById('view-dashboard').classList.add('flex');
-                    cargarListaAlumnos();
-                } else {
-                    showToast(res.error, 'error');
-                    document.getElementById('pin-input').value = '';
-                }
-            }).validarPinDocente(pin);
+                    
+                    cargarTodo();
+                })
+                .withFailureHandler(function(err) {
+                    btn.innerHTML = 'Ingresar';
+                    btn.disabled = false;
+                    showLoginError('Error de conexión: ' + err);
+                })
+                .validarPinDocente(pin);
         }
 
-        function logoutDocente() {
-            location.reload();
+        function cargarTodo() {
+            google.script.run
+                .withSuccessHandler(function(res) {
+                    if (res && res.success) {
+                        configuracion.conductas = res.conductas || [];
+                        renderizarConductas();
+                    }
+                })
+                .obtenerConfiguracion();
+            
+            google.script.run
+                .withSuccessHandler(function(lista) {
+                    listaAlumnos = lista || [];
+                })
+                .obtenerListaAlumnos();
+            
+            cargarSolicitudesPendientes();
+            initBuscador();
         }
 
-        function cargarListaAlumnos() {
-            showStatus(true, 'Cargando alumnos...');
-            google.script.run.withSuccessHandler(function(lista) {
-                showStatus(false);
-                const select = document.getElementById('student-select');
-                select.innerHTML = '<option value="" disabled selected>-- Selecciona o escribe nombre --</option>';
+        function renderizarConductas() {
+            var container = document.getElementById('conductas-container');
+            container.innerHTML = '';
+            
+            if (configuracion.conductas.length === 0) {
+                container.innerHTML = '<p class="text-xs text-slate-400 text-center py-2">No hay conductas configuradas</p>';
+                return;
+            }
+            
+            const esCoordinadorODirector = (sessionDocente.rol === 'coordinador' || sessionDocente.rol === 'director');
+            
+            configuracion.conductas.forEach(function(cond) {
+                const isGrave = cond.categoria === 'Faltas Graves';
                 
-                lista.sort((a, b) => a.nombre.localeCompare(b.nombre));
-
-                lista.forEach(alumno => {
-                    const option = document.createElement('option');
-                    option.value = alumno.hash; 
-                    option.text = alumno.nombre; 
-                    select.appendChild(option);
-                });
-            }).obtenerListaAlumnos();
+                if (isGrave && !esCoordinadorODirector) return;
+                
+                var btn = document.createElement('button');
+                btn.className = isGrave 
+                    ? 'w-full bg-red-100 border-2 border-red-400 text-red-800 p-3 rounded-2xl font-bold flex flex-row items-center justify-between shadow-sm'
+                    : 'w-full bg-red-50 border border-red-200 text-red-700 p-3 rounded-2xl font-bold flex flex-row items-center justify-between shadow-sm';
+                btn.onclick = function() { registrarIncidencia(cond); };
+                var puntosMostrar = isGrave ? '25%/50%/100%' : cond.puntos;
+                btn.innerHTML = '<div class="flex items-center gap-3"><span class="text-sm">' + cond.nombre + '</span><span class="text-[9px] opacity-70">' + cond.categoria + '</span></div><span class="bg-red-200 text-red-900 px-2 py-1 rounded text-xs font-bold">' + puntosMostrar + '</span>';
+                container.appendChild(btn);
+            });
         }
 
-        function seleccionarAlumno(hash) {
-            if (!hash) return;
-            showStatus(true, 'Buscando...');
+        function initBuscador() {
+            const input = document.getElementById('student-search');
+            const results = document.getElementById('search-results');
+            const btnClear = document.getElementById('btn-clear-search');
             
-            google.script.run.withSuccessHandler(function(res) {
-                showStatus(false);
-                if (res.success) {
-                    currentStudentData = res; 
-                    renderStudentCard(res);
-                    enableActions(true);
-                } else {
-                    showToast("Error al cargar datos", 'error');
+            if (!input) return;
+            
+            input.addEventListener('input', function() {
+                const query = this.value.trim().toLowerCase();
+                
+                if (query.length === 0) {
+                    results.classList.add('hidden');
+                    btnClear.classList.add('hidden');
+                    return;
                 }
-            }).buscarEstudiantePorHash(hash);
+                
+                btnClear.classList.remove('hidden');
+                
+                const encontrados = listaAlumnos.filter(a => 
+                    a.nombre.toLowerCase().includes(query) || 
+                    a.id.toLowerCase().includes(query) ||
+                    (a.grado || '').toLowerCase().includes(query)
+                ).slice(0, 20);
+                
+                if (encontrados.length === 0) {
+                    results.innerHTML = '<p class="p-3 text-sm text-slate-400 text-center">Sin resultados</p>';
+                } else {
+                    results.innerHTML = encontrados.map(a => `
+                        <div onclick="seleccionarAlumnoDesdeBusqueda('${a.id}')" 
+                            class="p-3 border-b border-slate-100 last:border-b-0 cursor-pointer hover:bg-mapis-light transition">
+                            <p class="font-bold text-sm text-slate-800">${a.nombre}</p>
+                            <p class="text-[11px] text-slate-500 mt-0.5">${a.grado} · <span class="font-mono">${a.id}</span></p>
+                        </div>
+                    `).join('');
+                }
+                
+                results.classList.remove('hidden');
+            });
+            
+            document.addEventListener('click', function(e) {
+                if (!input.contains(e.target) && !results.contains(e.target)) {
+                    results.classList.add('hidden');
+                }
+            });
         }
 
-        function renderStudentCard(data) {
-            const card = document.getElementById('student-card');
-            card.classList.remove('hidden');
+        function limpiarBusqueda() {
+            document.getElementById('student-search').value = '';
+            document.getElementById('search-results').classList.add('hidden');
+            document.getElementById('btn-clear-search').classList.add('hidden');
+        }
+
+        function seleccionarAlumnoDesdeBusqueda(id) {
+            const alumno = listaAlumnos.find(a => a.id === id);
+            if (alumno) {
+                document.getElementById('student-search').value = alumno.nombre;
+            }
+            document.getElementById('search-results').classList.add('hidden');
             
-            document.getElementById('stu-name').innerText = data.nombre;
-            document.getElementById('stu-grade').innerText = data.grado;
-            document.getElementById('stu-balance').innerText = data.saldo;
+            showLoading('Buscando...');
+            google.script.run
+                .withSuccessHandler(function(res) {
+                    hideLoading();
+                    if (res.success) {
+                        currentStudentData = res;
+                        currentStudentData.id = res.idEstudiante;
+                        
+                        document.getElementById('student-card').classList.remove('hidden');
+                        document.getElementById('stu-name').innerText = res.nombre;
+                        document.getElementById('stu-grade').innerText = res.grado + (res.rango ? ' · ' + res.rango : '');
+                        document.getElementById('stu-balance').innerText = res.saldo;
+                        document.getElementById('nota-container').classList.remove('hidden');
+                        document.getElementById('actions-grid').classList.remove('opacity-50', 'pointer-events-none');
+                    } else {
+                        showAlert('No encontrado', res.error || 'Error al cargar alumno');
+                    }
+                })
+                .withFailureHandler(function(err) {
+                    hideLoading();
+                    showAlert('Error', String(err));
+                })
+                .buscarEstudiantePorHash(id);
+        }
+
+        function registrarIncidencia(conducta) {
+            if (!currentStudentData) {
+                showAlert('Selecciona un alumno', 'Debes elegir un estudiante primero.');
+                return;
+            }
             
-            const img = document.getElementById('stu-photo');
-            img.src = data.foto + '?t=' + new Date().getTime();
+            showLoading('Guardando...');
+            var nota = document.getElementById('optional-note').value.trim();
             
-            card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            var data = {
+                idEstudiante: currentStudentData.id,
+                puntos: conducta.puntos,
+                tipoConducta: conducta.nombre,
+                categoria: conducta.categoria,
+                nota: nota,
+                idDocente: sessionDocente.id
+            };
+            
+            google.script.run
+                .withSuccessHandler(function(res) {
+                    hideLoading();
+                    if (res && res.success) {
+                        document.getElementById('stu-balance').innerText = res.nuevoSaldo;
+                        currentStudentData.saldo = res.nuevoSaldo;
+                        showAlert('Registrado', 'Nuevo saldo: ' + res.nuevoSaldo + ' pts');
+                        document.getElementById('optional-note').value = '';
+                    } else {
+                        showAlert('Error', res ? res.error : 'Error desconocido');
+                    }
+                })
+                .withFailureHandler(function(err) {
+                    hideLoading();
+                    showAlert('Error', String(err));
+                })
+                .registrarIncidencia(data);
         }
 
         function resetStudentCard() {
             document.getElementById('student-card').classList.add('hidden');
-            document.getElementById('student-select').value = ""; 
-            enableActions(false);
-            document.getElementById('view-dashboard').scrollTop = 0;
+            document.getElementById('nota-container').classList.add('hidden');
+            document.getElementById('student-search').value = '';
+            document.getElementById('optional-note').value = '';
+            currentStudentData = null;
+            document.getElementById('actions-grid').classList.add('opacity-50', 'pointer-events-none');
         }
 
-        function enableActions(enable) {
-            const grid = document.getElementById('actions-grid');
-            if (enable) grid.classList.remove('opacity-50', 'pointer-events-none');
-            else grid.classList.add('opacity-50', 'pointer-events-none');
+        // ==============================================
+        // SOLICITUDES
+        // ==============================================
+        function cargarSolicitudesPendientes() {
+            google.script.run
+                .withSuccessHandler(function(lista) {
+                    const container = document.getElementById('solicitudes-container');
+                    const section = document.getElementById('solicitudes-section');
+                    container.innerHTML = '';
+                    
+                    if (!lista || lista.length === 0) {
+                        section.classList.add('hidden');
+                        return;
+                    }
+                    
+                    section.classList.remove('hidden');
+                    
+                    lista.forEach(function(sol) {
+                        const div = document.createElement('div');
+                        div.className = 'bg-white border border-amber-200 p-3 rounded-2xl shadow-sm';
+                        div.innerHTML = `
+                            <div class="flex justify-between items-start mb-2">
+                                <div>
+                                    <p class="font-bold text-sm text-slate-800">${sol.nombreEstudiante}</p>
+                                    <p class="text-[10px] text-slate-500">${sol.fecha} · ${sol.idEstudiante} · ${sol.gradoEstudiante}</p>
+                                </div>
+                                <span class="bg-amber-100 text-amber-800 px-2 py-1 rounded text-[10px] font-bold">PENDIENTE</span>
+                            </div>
+                            <p class="text-xs text-slate-700 mb-3">
+                                Solicita: <strong>${sol.nombrePremio}</strong> 
+                                <span class="text-mapis-gold font-bold">(${sol.costo} pts)</span>
+                            </p>
+                            <div class="flex gap-2">
+                                <button onclick="abrirAprobacion(${sol.fila}, '${sol.idEstudiante}', '${sol.nombreEstudiante}', '${sol.nombrePremio}', ${sol.costo})" 
+                                    class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2 rounded-lg">
+                                    ✓ Aprobar
+                                </button>
+                                <button onclick="abrirRechazo(${sol.fila}, '${sol.nombreEstudiante}', '${sol.nombrePremio}')" 
+                                    class="flex-1 bg-red-500 hover:bg-red-600 text-white text-xs font-bold py-2 rounded-lg">
+                                    ✕ Rechazar
+                                </button>
+                            </div>
+                        `;
+                        container.appendChild(div);
+                    });
+                })
+                .obtenerSolicitudesPendientes(sessionDocente.id);
         }
 
-        function sendTransaction(puntos, tipo, categoria) {
-            if (!currentStudentData || !sessionDocente.id) return showToast("Selecciona un alumno primero", 'error');
+        function abrirAprobacion(fila, idEst, nombreEst, nombrePremio, costo) {
+            const hoy = new Date();
+            const fechaDefault = hoy.toISOString().split('T')[0];
             
-            showStatus(true, 'Guardando...');
-            const data = { 
-                hashQR: currentStudentData.hash, 
-                puntos: puntos, 
-                tipoConducta: tipo, 
-                categoria: categoria, 
-                nota: "", 
-                idDocente: sessionDocente.id 
+            document.getElementById('alert-title').innerText = 'Confirmar aprobación';
+            document.getElementById('alert-message').innerHTML = `
+                <div class="text-left space-y-3">
+                    <p class="text-sm text-slate-700">Al aprobar, se descontarán <strong class="text-mapis-gold">${costo} puntos</strong> a <strong>${nombreEst}</strong>.</p>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Fecha efectiva del premio</label>
+                        <input type="date" id="fecha-efectiva" value="${fechaDefault}" 
+                            class="w-full p-2 border border-slate-300 rounded-lg text-sm focus:border-mapis-dark outline-none">
+                    </div>
+                    <p class="text-[10px] text-slate-400">Se enviará un correo al estudiante con esta información.</p>
+                </div>
+            `;
+            
+            const btn = document.getElementById('btn-alert-close');
+            btn.innerText = '✓ Confirmar aprobación';
+            btn.className = 'w-full py-3 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700';
+            btn.onclick = function() {
+                const fecha = document.getElementById('fecha-efectiva').value;
+                if (!fecha) return;
+                document.getElementById('mapis-alert').classList.add('hidden');
+                confirmarAprobacion(fila, idEst, nombreEst, costo, fecha);
             };
+            
+            document.getElementById('mapis-alert').classList.remove('hidden');
+        }
 
-            google.script.run.withSuccessHandler(function(response) {
-                showStatus(false);
-                if (response && response.success) {
-                    document.getElementById('stu-balance').innerText = response.nuevoSaldo;
-                    currentStudentData.saldo = response.nuevoSaldo;
-                    
-                    // USAR TOAST EN LUGAR DE ALERT
-                    showToast(`Éxito: ${puntos > 0 ? '+' : ''}${puntos} pts a ${currentStudentData.nombre}`, 'success');
-                    
-                    resetStudentCard();
+        function confirmarAprobacion(fila, idEst, nombreEst, costo, fechaEfectiva) {
+            showLoading('Aprobando...');
+            google.script.run.withSuccessHandler(function(res) {
+                hideLoading();
+                if (res.success) {
+                    const msg = res.emailEnviado 
+                        ? 'Se descontaron ' + costo + ' pts. Se envió correo a ' + nombreEst + '.'
+                        : 'Se descontaron ' + costo + ' pts.';
+                    showAlert('✓ Aprobado', msg);
+                    cargarSolicitudesPendientes();
                 } else {
-                    showToast("Error: " + (response ? response.error : 'Desconocido'), 'error');
+                    showAlert('Error', res.error);
                 }
-            }).registrarTransaccion(data);
+            }).withFailureHandler(function(err) {
+                hideLoading();
+                showAlert('Error', String(err));
+            }).aprobarSolicitudCanje({
+                fila: fila, idEstudiante: idEst, costo: costo,
+                fechaEfectiva: fechaEfectiva, idDocente: sessionDocente.id
+            });
         }
 
-        function showStatus(show, msg) {
-            const overlay = document.getElementById('overlay-status');
-            if (show) {
-                document.getElementById('status-title').innerText = msg || 'Cargando...';
-                overlay.classList.remove('hidden');
-            } else {
-                overlay.classList.add('hidden');
-            }
+        function abrirRechazo(fila, nombreEst, nombrePremio) {
+            document.getElementById('alert-title').innerText = 'Rechazar solicitud';
+            document.getElementById('alert-message').innerHTML = `
+                <div class="text-left space-y-3">
+                    <p class="text-sm text-slate-700">¿Rechazar la solicitud de <strong>${nombreEst}</strong> para <strong>${nombrePremio}</strong>?</p>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Motivo del rechazo</label>
+                        <textarea id="motivo-rechazo" rows="3" placeholder="Ej: Saldo insuficiente..."
+                            class="w-full p-2 border border-slate-300 rounded-lg text-sm focus:border-mapis-dark outline-none resize-none"></textarea>
+                    </div>
+                </div>
+            `;
+            
+            const btn = document.getElementById('btn-alert-close');
+            btn.innerText = '✕ Confirmar rechazo';
+            btn.className = 'w-full py-3 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600';
+            btn.onclick = function() {
+                const motivo = document.getElementById('motivo-rechazo').value.trim() || 'No especificado';
+                document.getElementById('mapis-alert').classList.add('hidden');
+                confirmarRechazo(fila, nombreEst, motivo);
+            };
+            
+            document.getElementById('mapis-alert').classList.remove('hidden');
         }
+
+        function confirmarRechazo(fila, nombreEst, motivo) {
+            showLoading('Rechazando...');
+            google.script.run.withSuccessHandler(function(res) {
+                hideLoading();
+                if (res.success) {
+                    const msg = res.emailEnviado 
+                        ? 'Solicitud rechazada. Se envió correo a ' + nombreEst + '.'
+                        : 'Solicitud rechazada.';
+                    showAlert('Rechazada', msg);
+                    cargarSolicitudesPendientes();
+                } else {
+                    showAlert('Error', res.error);
+                }
+            }).withFailureHandler(function(err) {
+                hideLoading();
+                showAlert('Error', String(err));
+            }).rechazarSolicitudCanje({
+                fila: fila, motivo: motivo, idDocente: sessionDocente.id
+            });
+        }
+
+        // ==============================================
+        // DASHBOARD
+        // ==============================================
+        function abrirDashboard() {
+            document.getElementById('dash-modal').classList.remove('hidden');
+            
+            const hoy = new Date();
+            const hace30 = new Date(hoy.getTime() - (30 * 24 * 60 * 60 * 1000));
+            document.getElementById('filtro-fecha-desde').value = hace30.toISOString().split('T')[0];
+            document.getElementById('filtro-fecha-hasta').value = hoy.toISOString().split('T')[0];
+            
+            google.script.run.withSuccessHandler(function(res) {
+                if (!res.success) return;
+                
+                const selDoc = document.getElementById('filtro-docente');
+                selDoc.innerHTML = '<option value="">Todos</option>';
+                res.docentes.forEach(d => {
+                    selDoc.innerHTML += `<option value="${d.id}">${d.nombre}</option>`;
+                });
+                
+                const selGrado = document.getElementById('filtro-grado');
+                selGrado.innerHTML = '<option value="">Todos</option>';
+                res.grados.forEach(g => {
+                    selGrado.innerHTML += `<option value="${g}">${g}</option>`;
+                });
+                
+                const selEst = document.getElementById('filtro-estudiante');
+                selEst.innerHTML = '<option value="">Todos</option>';
+                res.estudiantes.forEach(e => {
+                    selEst.innerHTML += `<option value="${e.id}">${e.nombre} · ${e.grado}</option>`;
+                });
+            }).obtenerFiltrosDashboard();
+            
+            setTimeout(aplicarFiltrosDashboard, 500);
+        }
+
+        function cerrarDashboard() {
+            document.getElementById('dash-modal').classList.add('hidden');
+        }
+
+        function limpiarFiltrosDashboard() {
+            document.getElementById('filtro-docente').value = '';
+            document.getElementById('filtro-grado').value = '';
+            document.getElementById('filtro-estudiante').value = '';
+            const hoy = new Date();
+            const hace30 = new Date(hoy.getTime() - (30 * 24 * 60 * 60 * 1000));
+            document.getElementById('filtro-fecha-desde').value = hace30.toISOString().split('T')[0];
+            document.getElementById('filtro-fecha-hasta').value = hoy.toISOString().split('T')[0];
+            aplicarFiltrosDashboard();
+        }
+
+        function aplicarFiltrosDashboard() {
+            const contenedor = document.getElementById('dash-contenido');
+            contenedor.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">Cargando datos...</p>';
+            
+            const filtros = {
+                filtroDocente: document.getElementById('filtro-docente').value || null,
+                filtroGrado: document.getElementById('filtro-grado').value || null,
+                filtroEstudiante: document.getElementById('filtro-estudiante').value || null,
+                fechaDesde: document.getElementById('filtro-fecha-desde').value || null,
+                fechaHasta: document.getElementById('filtro-fecha-hasta').value || null
+            };
+            
+            google.script.run.withSuccessHandler(function(res) {
+                if (!res.success) {
+                    contenedor.innerHTML = '<p class="text-xs text-red-500 text-center py-4">' + (res.error || 'Error') + '</p>';
+                    return;
+                }
+                
+                let html = '';
+                
+                // 4 TARJETAS DE MÉTRICAS (igual que admin)
+                html += `
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="bg-mapis-light p-3 rounded-xl border border-mapis-dark/10">
+                            <p class="text-[9px] text-mapis-dark font-bold uppercase">Incidencias</p>
+                            <p class="text-2xl font-black text-mapis-dark">${res.metricas.totalIncidencias}</p>
+                        </div>
+                        <div class="bg-mapis-light p-3 rounded-xl border border-mapis-dark/10">
+                            <p class="text-[9px] text-mapis-dark font-bold uppercase">Canjes</p>
+                            <p class="text-2xl font-black text-mapis-dark">${res.metricas.totalCanjes}</p>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                            <p class="text-[9px] text-slate-500 font-bold uppercase">Estudiantes</p>
+                            <p class="text-2xl font-black text-slate-700">${res.metricas.totalEstudiantes}</p>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                            <p class="text-[9px] text-slate-500 font-bold uppercase">Saldo prom.</p>
+                            <p class="text-2xl font-black text-slate-700">${res.metricas.saldoPromedio}</p>
+                        </div>
+                    </div>
+                `;
+                
+                if (res.topIncidencias && res.topIncidencias.length > 0) {
+                    html += `<div class="mt-4"><p class="text-xs font-bold text-mapis-dark mb-2">🔥 Incidencias más frecuentes</p><div class="space-y-1">`;
+                    res.topIncidencias.forEach((it, idx) => {
+                        html += `<div class="flex justify-between items-center p-2 bg-slate-50 rounded-lg border border-slate-200 text-xs">
+                            <span class="font-bold text-slate-700">${idx + 1}. ${it.tipo}</span>
+                            <span class="bg-red-100 text-red-700 px-2 py-0.5 rounded font-bold">${it.count}</span>
+                        </div>`;
+                    });
+                    html += `</div></div>`;
+                }
+                
+                if (res.topGrados && res.topGrados.length > 0) {
+                    html += `<div class="mt-4"><p class="text-xs font-bold text-mapis-dark mb-2">🏫 Grados con más incidencias</p><div class="space-y-1">`;
+                    res.topGrados.forEach((it, idx) => {
+                        html += `<div class="flex justify-between items-center p-2 bg-slate-50 rounded-lg border border-slate-200 text-xs">
+                            <span class="font-bold text-slate-700">${idx + 1}. ${it.grado}</span>
+                            <span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-bold">${it.count}</span>
+                        </div>`;
+                    });
+                    html += `</div></div>`;
+                }
+                
+                if (res.topEstudiantes && res.topEstudiantes.length > 0) {
+                    html += `<div class="mt-4"><p class="text-xs font-bold text-mapis-dark mb-2">👤 Estudiantes con más incidencias</p><div class="space-y-1">`;
+                    res.topEstudiantes.forEach((it, idx) => {
+                        html += `<div class="flex justify-between items-center p-2 bg-slate-50 rounded-lg border border-slate-200 text-xs">
+                            <div>
+                                <p class="font-bold text-slate-700">${idx + 1}. ${it.nombre}</p>
+                                <p class="text-[9px] text-slate-400">${it.grado} · ${it.id}</p>
+                            </div>
+                            <span class="bg-red-100 text-red-700 px-2 py-0.5 rounded font-bold">${it.count}</span>
+                        </div>`;
+                    });
+                    html += `</div></div>`;
+                }
+                
+                if (res.topDocentes && res.topDocentes.length > 0) {
+                    html += `<div class="mt-4"><p class="text-xs font-bold text-mapis-dark mb-2">👨‍🏫 Docentes registradores</p><div class="space-y-1">`;
+                    res.topDocentes.forEach((it, idx) => {
+                        html += `<div class="flex justify-between items-center p-2 bg-slate-50 rounded-lg border border-slate-200 text-xs">
+                            <span class="font-bold text-slate-700">${idx + 1}. ${it.nombre}</span>
+                            <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-bold">${it.count}</span>
+                        </div>`;
+                    });
+                    html += `</div></div>`;
+                }
+                
+                if (res.metricas.totalIncidencias === 0 && res.metricas.totalCanjes === 0) {
+                    html += '<p class="text-xs text-slate-400 text-center py-4 mt-4">Sin datos para este período</p>';
+                }
+                
+                contenedor.innerHTML = html;
+            }).withFailureHandler(function(err) {
+                contenedor.innerHTML = '<p class="text-xs text-red-500 text-center py-4">Error: ' + err + '</p>';
+            }).obtenerDashboardFiltrable(filtros);
+        }
+
+        // ==============================================
+        // BUZÓN ENVIAR
+        // ==============================================
+        function abrirBuzon() {
+            document.getElementById('buzon-mensaje').value = '';
+            document.getElementById('buzon-tipo').value = 'Sugerencia';
+            document.getElementById('buzon-modal').classList.remove('hidden');
+        }
+
+        function cerrarBuzon() {
+            document.getElementById('buzon-modal').classList.add('hidden');
+        }
+
+        function enviarSugerenciaDocente() {
+            const tipo = document.getElementById('buzon-tipo').value;
+            const mensaje = document.getElementById('buzon-mensaje').value.trim();
+            
+            if (!mensaje) {
+                return showAlert('Falta el mensaje', 'Escribe tu sugerencia antes de enviar.');
+            }
+            
+            showLoading('Enviando...');
+            google.script.run.withSuccessHandler(function(res) {
+                hideLoading();
+                if (res.success) {
+                    cerrarBuzon();
+                    showAlert('¡Gracias!', 'Tu sugerencia fue enviada al equipo directivo.');
+                } else {
+                    showAlert('Error', res.error);
+                }
+            }).withFailureHandler(function(err) {
+                hideLoading();
+                showAlert('Error', String(err));
+            }).enviarSugerencia({
+                autor: sessionDocente.nombre,
+                rolAutor: sessionDocente.rol || 'docente',
+                tipo: tipo,
+                mensaje: mensaje
+            });
+        }
+
+        // ==============================================
+        // VER SUGERENCIAS (coordinador/director)
+        // ==============================================
+        function abrirVerSugerencias() {
+            document.getElementById('ver-sugerencias-modal').classList.remove('hidden');
+            
+            const contenedor = document.getElementById('ver-sugerencias-contenedor');
+            contenedor.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">Cargando...</p>';
+            
+            google.script.run.withSuccessHandler(function(lista) {
+                contenedor.innerHTML = '';
+                if (!lista || lista.length === 0) {
+                    contenedor.innerHTML = '<p class="text-center text-slate-400 text-sm py-4">No hay sugerencias todavía</p>';
+                    return;
+                }
+                lista.forEach(s => {
+                    const div = document.createElement('div');
+                    div.className = 'p-3 bg-white border border-slate-200 rounded-xl shadow-sm';
+                    const tipoColor = s.tipo === 'Error' ? 'bg-red-100 text-red-700' 
+                                    : s.tipo === 'Propuesta' ? 'bg-emerald-100 text-emerald-700'
+                                    : 'bg-amber-100 text-amber-700';
+                    div.innerHTML = `
+                        <div class="flex justify-between items-start mb-1">
+                            <p class="text-[10px] text-slate-500">${s.fecha} · ${s.autor} (${s.rolAutor})</p>
+                            <span class="${tipoColor} px-2 py-0.5 rounded text-[9px] font-bold">${s.tipo}</span>
+                        </div>
+                        <p class="text-xs text-slate-700 leading-relaxed">${s.mensaje}</p>
+                    `;
+                    contenedor.appendChild(div);
+                });
+            }).withFailureHandler(function(err) {
+                contenedor.innerHTML = '<p class="text-xs text-red-500 text-center py-4">Error: ' + err + '</p>';
+            }).obtenerSugerencias();
+        }
+
+        function cerrarVerSugerencias() {
+            document.getElementById('ver-sugerencias-modal').classList.add('hidden');
+        }
+
+        // ==============================================
+        // EVENT LISTENERS
+        // ==============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('btn-login').addEventListener('click', loginDocente);
+            
+            document.getElementById('btn-logout').addEventListener('click', function() {
+                window.top.location.href = 'https://script.google.com/macros/s/AKfycbzCMv9oeZ7bADwVzJoMp3xW7iRUDEN4Bux89-GtrPJsLAot0CCby6B9RrQ1iyGm2gND/exec';
+            });
+            
+            document.getElementById('btn-reset').addEventListener('click', resetStudentCard);
+            document.getElementById('btn-alert-close').addEventListener('click', hideAlert);
+            
+            document.getElementById('pin-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') loginDocente();
+            });
+            document.getElementById('pin-input').focus();
+        });
     </script>
 </body>
 </html>
