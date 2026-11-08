@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base target="_top">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- Tailwind CSS (Este sí puede ser externo porque no usa cámara) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Iconos Phosphor -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- CARGA LOCAL DE LA LIBRERÍA QR (SOLUCIÓN AL ERROR DE SEGURIDAD) -->
+    <?!= include('qr-lib'); ?>
+
+    <style>
+        body { font-family: 'Inter', system-ui, sans-serif; background-color: #f8fafc; touch-action: manipulation; }
+        .fade-in { animation: fadeIn 0.3s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Ocultar elementos nativos del scanner */
+        #reader__dashboard_section_csr span, 
+        #reader__dashboard_section_swaplink,
+        #reader__filescan_input { display: none !important; }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden bg-slate-50">
+
+    <!-- HEADER DOCENTE -->
+    <header class="bg-slate-900 text-white p-4 shadow-lg z-20 flex-shrink-0">
+        <div class="flex justify-between items-center max-w-md mx-auto w-full">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-sm">M</div>
+                <h1 class="font-bold text-lg tracking-tight">MAPIS DOCENTE</h1>
+            </div>
+            <span class="text-[10px] font-bold bg-blue-600/30 text-blue-200 px-2 py-1 rounded-full border border-blue-500/30">v1.0 MVP</span>
+        </div>
+    </header>
+
+    <!-- ÁREA PRINCIPAL -->
+    <main class="flex-1 overflow-y-auto relative w-full max-w-md mx-auto bg-white shadow-xl min-h-0">
+        
+        <!-- VISTA 1: ESCÁNER QR -->
+        <div id="view-scanner" class="flex flex-col items-center justify-center h-full p-6 space-y-6 fade-in">
+            
+            <div class="text-center space-y-2 mb-4">
+                <h2 class="text-xl font-bold text-slate-800">Escanear Carnet</h2>
+                <p class="text-sm text-slate-500">Apunta la cámara al código QR del estudiante</p>
+            </div>
+
+            <!-- Contenedor de Cámara -->
+            <div class="relative w-full aspect-square bg-black rounded-2xl overflow-hidden shadow-inner border-4 border-slate-200">
+                <div id="reader" class="w-full h-full"></div>
+                
+                <!-- Overlay visual de guía -->
+                <div class="absolute inset-0 pointer-events-none border-2 border-white/30 m-8 rounded-lg">
+                    <div class="absolute top-0 left-0 w-4 h-4 border-t-4 border-l-4 border-blue-500 -mt-1 -ml-1"></div>
+                    <div class="absolute top-0 right-0 w-4 h-4 border-t-4 border-r-4 border-blue-500 -mt-1 -mr-1"></div>
+                    <div class="absolute bottom-0 left-0 w-4 h-4 border-b-4 border-l-4 border-blue-500 -mb-1 -ml-1"></div>
+                    <div class="absolute bottom-0 right-0 w-4 h-4 border-b-4 border-r-4 border-blue-500 -mb-1 -mr-1"></div>
+                </div>
+            </div>
+
+            <div class="bg-yellow-50 text-yellow-800 p-3 rounded-xl text-xs text-center border border-yellow-200 max-w-xs">
+                💡 Tip: Asegúrate de tener buena iluminación y sostener el celular estable.
+            </div>
+        </div>
+
+        <!-- VISTA 2: PANEL DE ACCIÓN (Oculto inicialmente) -->
+        <div id="view-action" class="hidden flex-col h-full p-6 pb-24 overflow-y-auto fade-in">
+            
+            <!-- Tarjeta Estudiante Detectado -->
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 text-center relative overflow-hidden mb-6">
+                <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-500 via-emerald-500 to-teal-500"></div>
+                
+                <div class="w-20 h-20 bg-slate-100 rounded-full mx-auto mb-3 flex items-center justify-center text-3xl text-slate-400 border-2 border-white shadow-sm">
+                    <i class="ph-fill ph-user"></i>
+                </div>
+                
+                <h2 id="student-name" class="text-xl font-bold text-slate-800 leading-tight">Cargando...</h2>
+                <p id="student-grade" class="text-slate-500 text-sm mt-1 font-medium">--</p>
+                
+                <div class="mt-4 inline-flex items-center gap-2 bg-slate-50 px-4 py-2 rounded-xl border border-slate-100">
+                    <span class="text-xs text-slate-400 font-bold uppercase">Saldo:</span>
+                    <span id="current-balance" class="text-lg font-black text-emerald-600">--</span>
+                </div>
+            </div>
+
+            <!-- Grid de Conductas -->
+            <div class="space-y-4">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Acciones Rápidas</h3>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="sendTransaction(50, 'Entrega Anticipada', 'Académico')" 
+                        class="group bg-emerald-50 hover:bg-emerald-100 active:bg-emerald-200 border border-emerald-200 text-emerald-700 p-4 rounded-2xl font-bold transition-all duration-200 flex flex-col items-center gap-2 shadow-sm hover:shadow-md active:scale-95">
+                        <i class="ph-fill ph-check-circle text-2xl group-hover:scale-110 transition-transform"></i> 
+                        <span>+50 pts</span>
+                        <span class="text-[10px] font-normal opacity-70">Entrega Ant.</span>
+                    </button>
+                    
+                    <button onclick="sendTransaction(30, 'Participación Activa', 'Académico')" 
+                        class="group bg-teal-50 hover:bg-teal-100 active:bg-teal-200 border border-teal-200 text-teal-700 p-4 rounded-2xl font-bold transition-all duration-200 flex flex-col items-center gap-2 shadow-sm hover:shadow-md active:scale-95">
+                        <i class="ph-fill ph-hand-raised text-2xl group-hover:scale-110 transition-transform"></i> 
+                        <span>+30 pts</span>
+                        <span class="text-[10px] font-normal opacity-70">Participación</span>
+                    </button>
+                    
+                    <button onclick="sendTransaction(-20, 'Interrupción Clase', 'Hábitos')" 
+                        class="group bg-red-50 hover:bg-red-100 active:bg-red-200 border border-red-200 text-red-700 p-4 rounded-2xl font-bold transition-all duration-200 flex flex-col items-center gap-2 shadow-sm hover:shadow-md active:scale-95">
+                        <i class="ph-fill ph-warning-circle text-2xl group-hover:scale-110 transition-transform"></i> 
+                        <span>-20 pts</span>
+                        <span class="text-[10px] font-normal opacity-70">Interrupción</span>
+                    </button>
+                    
+                    <button onclick="sendTransaction(-30, 'Celular sin Permiso', 'Hábitos')" 
+                        class="group bg-rose-50 hover:bg-rose-100 active:bg-rose-200 border border-rose-200 text-rose-700 p-4 rounded-2xl font-bold transition-all duration-200 flex flex-col items-center gap-2 shadow-sm hover:shadow-md active:scale-95">
+                        <i class="ph-fill ph-device-mobile-slash text-2xl group-hover:scale-110 transition-transform"></i> 
+                        <span>-30 pts</span>
+                        <span class="text-[10px] font-normal opacity-70">Celular</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Nota Opcional -->
+            <div class="mt-6">
+                <label class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1 block">Observación (Opcional)</label>
+                <textarea id="optional-note" rows="2" placeholder="Ej: Trabajo muy prolijo..." class="w-full p-3 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-blue-500 outline-none transition text-sm resize-none"></textarea>
+            </div>
+
+            <!-- Botón Cancelar/Volver -->
+            <button onclick="resetScanner()" class="mt-6 w-full py-3.5 text-slate-500 font-semibold hover:text-slate-800 hover:bg-slate-100 rounded-xl transition flex items-center justify-center gap-2">
+                <i class="ph-bold ph-arrow-left"></i> Escanear otro estudiante
+            </button>
+        </div>
+
+        <!-- OVERLAY DE ESTADO -->
+        <div id="overlay-status" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center backdrop-blur-sm transition-opacity duration-300">
+            <div class="bg-white p-8 rounded-3xl shadow-2xl text-center max-w-[280px] mx-4 transform scale-100 transition-transform duration-300 border border-slate-100">
+                <div id="status-icon" class="text-5xl mb-4 animate-bounce"></div>
+                <h3 id="status-title" class="font-bold text-xl text-slate-800 mb-2">Procesando...</h3>
+                <p id="status-msg" class="text-sm text-slate-500 leading-relaxed">Guardando registro en la base de datos</p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- LÓGICA JAVASCRIPT -->
+    <script>
+        let currentStudentHash = null;
+        let isProcessing = false;
+        let html5QrCode; 
+
+        // --- 1. CONFIGURACIÓN DEL ESCÁNER ROBUSTO PARA MÓVILES ---
+        async function startScanner() {
+            const readerElement = document.getElementById('reader');
+            readerElement.innerHTML = ''; 
+            
+            try {
+                // Obtener lista de cámaras disponibles
+                const devices = await Html5Qrcode.getCameras();
+                
+                if (!devices || devices.length === 0) {
+                    throw new Error("No se detectaron cámaras");
+                }
+
+                // Seleccionar la cámara trasera
+                let cameraId = devices[0].id; 
+                
+                for (let i = 0; i < devices.length; i++) {
+                    if (devices[i].label.toLowerCase().includes('back') || 
+                        devices[i].label.toLowerCase().includes('trasera') ||
+                        devices[i].label.toLowerCase().includes('environment')) {
+                        cameraId = devices[i].id;
+                        break;
+                    }
+                }
+                
+                if (cameraId === devices[0].id && devices.length > 1) {
+                    cameraId = devices[devices.length - 1].id;
+                }
+
+                html5QrCode = new Html5Qrcode("reader");
+                
+                const config = { 
+                    fps: 10, 
+                    qrbox: { width: 250, height: 250 },
+                    aspectRatio: 1.0
+                };
+
+                await html5QrCode.start(cameraId, config, onScanSuccess, onScanFailure);
+                
+            } catch (err) {
+                console.error("Error iniciando cámara:", err);
+                readerElement.innerHTML = `
+                    <div class="flex flex-col items-center justify-center h-full p-6 text-center text-red-600 bg-red-50 rounded-2xl border border-red-100">
+                        <i class="ph-fill ph-camera-slash text-4xl mb-3"></i>
+                        <p class="font-bold">Cámara no disponible</p>
+                        <p class="text-xs mt-2 text-red-500">${err.message}</p>
+                        <button onclick="location.reload()" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-bold shadow-md">Reintentar</button>
+                    </div>`;
+            }
+        }
+
+        function onScanSuccess(decodedText, decodedResult) {
+            if (isProcessing) return; 
+            if (!decodedText || decodedText.length < 3) return;
+
+            currentStudentHash = decodedText;
+            
+            if(html5QrCode) {
+                html5QrCode.stop().then(() => {
+                    document.getElementById('view-scanner').classList.add('hidden');
+                    document.getElementById('view-action').classList.remove('hidden');
+                    loadStudentDataMock(currentStudentHash);
+                }).catch(err => console.error("Stop error", err));
+            }
+        }
+
+        function onScanFailure(error) {}
+
+        // --- 2. SIMULACIÓN DE DATOS ---
+        function loadStudentDataMock(hash) {
+            document.getElementById('student-name').innerText = "Mateo Sánchez";
+            document.getElementById('student-grade').innerText = "3er Año A | ID: " + hash.substring(0,6);
+            document.getElementById('current-balance').innerText = "875";
+        }
+
+        // --- 3. ENVÍO DE TRANSACCIÓN ---
+        function sendTransaction(puntos, tipo, categoria) {
+            if (isProcessing || !currentStudentHash) return;
+            
+            const nota = document.getElementById('optional-note').value;
+            const data = {
+                hashQR: currentStudentHash,
+                puntos: puntos,
+                tipoConducta: tipo,
+                categoria: categoria,
+                nota: nota,
+                idDocente: 'DOC-MVP-01'
+            };
+
+            showStatus('loading');
+            isProcessing = true;
+
+            google.script.run
+                .withSuccessHandler(function(response) {
+                    isProcessing = false;
+                    if (response && response.success) {
+                        showStatus('success', `¡${puntos > 0 ? '+' : ''}${puntos} pts guardados!`);
+                        if(response.nuevoSaldo !== undefined) {
+                            document.getElementById('current-balance').innerText = response.nuevoSaldo;
+                        }
+                        document.getElementById('optional-note').value = '';
+                        setTimeout(resetScanner, 2000);
+                    } else {
+                        showStatus('error', response ? response.error : 'Error desconocido');
+                    }
+                })
+                .withFailureHandler(function(err) {
+                    isProcessing = false;
+                    showStatus('error', 'Error de red o servidor');
+                })
+                .registrarTransaccion(data);
+        }
+
+        // --- 4. UTILIDADES DE INTERFAZ ---
+        function showStatus(type, msg) {
+            const overlay = document.getElementById('overlay-status');
+            const icon = document.getElementById('status-icon');
+            const title = document.getElementById('status-title');
+            const message = document.getElementById('status-msg');
+
+            overlay.classList.remove('hidden');
+            title.className = "font-bold text-xl mb-2"; 
+            
+            if (type === 'loading') {
+                icon.innerText = '⏳';
+                icon.className = "text-5xl mb-4 animate-pulse text-blue-500";
+                title.innerText = 'Guardando...';
+                title.classList.add('text-slate-800');
+                message.innerText = 'Sincronizando con Google Sheets';
+            } else if (type === 'success') {
+                icon.innerText = '✅';
+                icon.className = "text-5xl mb-4 text-emerald-500 scale-110";
+                title.innerText = '¡Éxito!';
+                title.classList.add('text-emerald-600');
+                message.innerText = msg;
+            } else {
+                icon.innerText = '❌';
+                icon.className = "text-5xl mb-4 text-red-500";
+                title.innerText = 'Error';
+                title.classList.add('text-red-600');
+                message.innerText = msg;
+            }
+        }
+
+        function resetScanner() {
+            document.getElementById('overlay-status').classList.add('hidden');
+            document.getElementById('view-action').classList.add('hidden');
+            document.getElementById('view-scanner').classList.remove('hidden');
+            startScanner(); 
+            currentStudentHash = null;
+            isProcessing = false;
+        }
+
+        window.onload = function() {
+            startScanner();
+        };
+    </script>
+</body>
+</html>
